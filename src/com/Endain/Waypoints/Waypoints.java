@@ -18,7 +18,7 @@ import org.bukkit.plugin.PluginManager;
 * 
 * Now on Github.
 * 
-* Alpha version - v0.2.1
+* Alpha version - v0.2.2
 * @author Endain
 */
 public class Waypoints extends JavaPlugin {
@@ -36,7 +36,7 @@ public class Waypoints extends JavaPlugin {
     	//getDataManager().cleanPlayerPoints();
     	
     	if(getDataManager() != null)
-    		getDataManager().trySave();
+    		getDataManager().trySave(false);
         sendConsoleMsg("DISABLED!");
     }
 
@@ -130,15 +130,15 @@ public class Waypoints extends JavaPlugin {
         	if(sender instanceof Player) {
         		if(getDataManager().isUsingGroupManager() && getDataManager().gmWorking()) {
         			if(getDataManager().getPermissions().getWorldsHolder().getWorldPermissions((Player)sender).has((Player)sender, "waypoints.savepoint"))
-        				getDataManager().trySave();
+        				getDataManager().trySave(true);
         		}
         		else if(((Player)sender).isOp())
-        			getDataManager().trySave();
+        			getDataManager().trySave(true);
         		else
         			sender.sendMessage(getDataManager().wpMessage("You do not have permission to do that!"));
         	}
         	else
-        		getDataManager().trySave();
+        		getDataManager().trySave(true);
         	return true;
         }
         

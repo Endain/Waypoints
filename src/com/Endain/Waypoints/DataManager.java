@@ -300,7 +300,7 @@ public class DataManager {
 		}
 		//Force a save to commit any verification changes
 		if(this.deleteMissingPoints)
-			trySave();
+			trySave(false);
 		//Hook into GroupManager if we need to (and can)
 		if(isUsingGroupManager())
 			enableGroupManager();
@@ -312,7 +312,7 @@ public class DataManager {
 			this.autoSaveTimer = new Timer();
 			this.autoSaveTimer.scheduleAtFixedRate(new TimerTask() {
 				public void run() {
-					trySave();
+					trySave(false);
 					plugin.sendConsoleMsg("All data saved!");
 				}
 			}, 60000, this.saveInterval * 60000);
@@ -590,10 +590,10 @@ public class DataManager {
 	}
 	
 	//This function is used to initiate a save of player data.
-	public void trySave() {
+	public void trySave(boolean notifyServer) {
 		cleanPlayerPoints();
-		writePointData(true, true, true);
-		writePlayerData(true, true, true);
+		writePointData(true, notifyServer, true);
+		writePlayerData(true, notifyServer, true);
 		return;
 	}
 	
