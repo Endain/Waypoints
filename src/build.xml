@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
   <project name="Waypoints.makejar" default="makejar" basedir=".">
   <target name ="makejar" description="Create a jar for the Waypoints Plugin.">
-    <jar jarfile="Waypoints.jar" includes="com/Endain/Waypoints/*.class plugin.yml" basedir=""/>
+    <jar jarfile="Waypoints.jar" includes="bin/com/Endain/Waypoints/*.class src/plugin.yml" basedir=""/>
   </target>
   </project>
