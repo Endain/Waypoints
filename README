@@ -1,0 +1,29 @@
+README - Waypoints (v0.2.2)
+
+To install the plugin, drop it into your plugin folder that resides in your default Bukkit directory.
+- - - - - - - - - - - - - -
+When you start your server a folder named 'Waypoints' will be created within the plugin folder. Inside of
+this new 'Waypoints' folder 3 files will be generated: waypoints.txt, playerpoints.txt and config.txt.
+- - - - - - - - - - - - - -
+waypoints.txt - This file contains the save data for each physical waypoint.
+playerpoints.txt - This file contains the save data for the waypoint that each player is bound to.
+config.txt - This file contains all configuration settings for the plugin.
+- - - - - - - - - - - - - -
+After all the files are generated you may change around the options in config.txt if you wish. For any
+changes to apply you must restart the server. Always stop the server using the 'stop' command to ensure
+that all critical data is saved.
+- - - - - - - - - - - - - -
+If you are using GroupManager the permission nodes you need to add are:
+waypoints.addpoint    (for /wpadd)
+waypoints.delpoint    (for /wpdel)
+waypoints.savepoint   (for /wpsave)
+
+Read through the generated config.txt for more details on each config option.
+
+- - - - - - - - - - - - - -
+
+To bind yourself to a point if the config is not set to bind players automatically a player must type
+the command /wpbind from within the given 'save radius'.
+
+
+ - Endain
