@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <project name="Waypoints.makejar" default="makejar" basedir=".">
+  <target name ="makejar" description="Create a jar for the Waypoints Plugin.">
+    <jar jarfile="Waypoints.jar" includes="*.class" basedir=""/>
+  </target>
+  </project>

@@ -3,12 +3,15 @@ package com.Endain.Waypoints;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Map.Entry;
 import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.anjocaido.groupmanager.GroupManager;
 import org.bukkit.ChatColor;
@@ -38,7 +41,8 @@ public class DataManager {
 	private boolean useGroupManager;
 	private boolean gmIsWorking;
 	private GroupManager permissions;
-	//Test
+	private Timer autoSaveTimer;
+	
 	//Constructor for DataManager
 	public DataManager(Waypoints plugin) {
 		//Initialize all needed Maps and Lists
@@ -58,6 +62,7 @@ public class DataManager {
 		this.useGroupManager = false;
 		this.permissions = null;
 		this.saveInterval = 0;
+		this.autoSaveTimer = null;
 	}
 	
 	//Load performs required plugin startup operations. Such as reading from
@@ -165,9 +170,9 @@ public class DataManager {
 			plugin.sendConsoleMsg("Save Radius: " + this.saveRadius);
 			plugin.sendConsoleMsg("Force Auto Save: " + this.forceAutosave);
 			plugin.sendConsoleMsg("Auto Generate Points: " + "(UNFINISHED)"/*this.autoGenerate*/);
-			plugin.sendConsoleMsg("Delete Missing Points: " + "(UNFINISHED)"/*this.deleteMissingPoints*/);
+			plugin.sendConsoleMsg("Delete Missing Points: " + this.deleteMissingPoints);
 			plugin.sendConsoleMsg("Use GroupManager: " + this.useGroupManager);
-			plugin.sendConsoleMsg("Data Save Interval: " + "(UNFINISHED)"/*this.saveInterval*/);
+			plugin.sendConsoleMsg("Data Save Interval: " + this.saveInterval);
 			plugin.sendConsoleMsg("- - - - - - - - - - - - - - - - - - - - - -");
 		}
 		catch (Exception e) {
@@ -186,6 +191,11 @@ public class DataManager {
 			int z;
 			String world;
 			
+			if(this.deleteMissingPoints) {
+				plugin.sendConsoleMsg("Waypoint data will be verified!");
+				plugin.sendConsoleMsg("(This may take a while)");
+			}
+			
 			while(scan.hasNextLine()) {
 				in = scan.nextLine();
 				
@@ -199,10 +209,29 @@ public class DataManager {
 					x = Integer.parseInt(wpoint[2]);
 					y = Integer.parseInt(wpoint[3]);
 					z = Integer.parseInt(wpoint[4]);
-					
 					Point p = new Point(id, world, x, y, z);
-					wPoints.put(id, p);
-					regions.add(new Region(x, y, z, this.protectionRadius, this.saveRadius, p));
+					
+					if(this.deleteMissingPoints) {
+						World w = this.plugin.getServer().getWorld(p.getWorld());
+						boolean valid = true;
+						for(int i = -1; i <= 1; i++)
+							for(int j = -1; j <= 1; j++)
+								if(w.getBlockAt(p.getX() + i, p.getY() - 1, p.getZ() + j).getType() != Material.GLOWSTONE)
+									valid = false;
+						
+						for(int i = 0; i < 3; i++)
+							if(w.getBlockAt(p.getX(), p.getY() + i, p.getZ()).getType() != Material.BEDROCK)
+								valid = false;
+						
+						if(valid) {
+							wPoints.put(id, p);
+							regions.add(new Region(x, y, z, this.protectionRadius, this.saveRadius, p));
+						}
+					}
+					else {
+						wPoints.put(id, p);
+						regions.add(new Region(x, y, z, this.protectionRadius, this.saveRadius, p));
+					}
 				}
 				else {
 					plugin.sendConsoleMsg("Invalid waypoint in file: " + in);
@@ -212,6 +241,8 @@ public class DataManager {
 			}
 			
 			scan.close();
+			if(this.deleteMissingPoints)
+				plugin.sendConsoleMsg("Waypoint verification complete!");
 			plugin.sendConsoleMsg("Waypoint data parsed successfully!");
 			plugin.sendConsoleMsg(wPoints.size() + " Waypoints have been loaded!");
 			plugin.sendConsoleMsg("- - - - - - - - - - - - - - - - - - - - - -");
@@ -267,11 +298,25 @@ public class DataManager {
 			plugin.sendConsoleMsg("The plugin will be disabled!");
 			return false;
 		}
-		//Hook into GroupManager is need to (and can)
+		//Force a save to commit any verification changes
+		if(this.deleteMissingPoints)
+			trySave();
+		//Hook into GroupManager if we need to (and can)
 		if(isUsingGroupManager())
 			enableGroupManager();
-		
-		//TODO - Setup save-interval
+		//Verify valid save interval
+		if(this.saveInterval < 0)
+			this.saveInterval = 0;
+		//If save interval is not 0, start saving at a fixed interval
+		if(this.autoSaveTimer == null && this.saveInterval > 0){
+			this.autoSaveTimer = new Timer();
+			this.autoSaveTimer.scheduleAtFixedRate(new TimerTask() {
+				public void run() {
+					trySave();
+					plugin.sendConsoleMsg("All data saved!");
+				}
+			}, 60000, this.saveInterval * 60000);
+		}
 		
 		//Loading of plugin successful!
 		return true;
@@ -750,7 +795,7 @@ public class DataManager {
 			plugin.sendConsoleMsg("Config data folder not found!");
 			plugin.sendConsoleMsg("New folder made!");
 		}
-		location = dataFolder.getPath() + "\\";
+		location = dataFolder.getPath() + "/";
 		File points = new File(location + "waypoints.txt");
 		
 		if(!points.exists()) {
@@ -818,7 +863,7 @@ public class DataManager {
 			plugin.sendConsoleMsg("Config data folder not found!");
 			plugin.sendConsoleMsg("New folder made!");
 		}
-		location = dataFolder.getPath() + "\\";
+		location = dataFolder.getPath() + "/";
 		File players = new File(location + "playerpoints.txt");
 		
 		if(!players.exists()) {
@@ -887,7 +932,7 @@ public class DataManager {
 			plugin.sendConsoleMsg("Config data folder not found!");
 			plugin.sendConsoleMsg("New folder made!");
 		}
-		location = dataFolder.getPath() + "\\";
+		location = dataFolder.getPath() + "/";
 		//Check that all needed config files exist
 		//Create them with defaults if the don't
 		File config = new File(location + "config.txt");

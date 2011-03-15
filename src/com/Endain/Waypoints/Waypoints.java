@@ -18,7 +18,7 @@ import org.bukkit.plugin.PluginManager;
 * 
 * Now on Github.
 * 
-* Alpha version - v0.2.0
+* Alpha version - v0.2.1
 * @author Endain
 */
 public class Waypoints extends JavaPlugin {
