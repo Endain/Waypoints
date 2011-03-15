@@ -999,7 +999,7 @@ public class DataManager {
 				configMaker.println("#is set to false the plugin will always ignore the GroupManager");
 				configMaker.println("#plugin and give Waypoint spawn/delete power to OP's only.");
 				configMaker.println("# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #");
-				configMaker.println("data-save-interval=0");
+				configMaker.println("data-save-interval=15");
 				configMaker.println("# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #");
 				configMaker.println("#NOT CODED OR WORKING CURRENTLY#");
 				configMaker.println("#Specifies the amount of time in minutes between when the plugin");
