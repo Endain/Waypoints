@@ -69,6 +69,14 @@ public class DataManager {
 	//data and config files and loading any needed data. returns true if it
 	//reaches the end of it's body without critical error(s).
 	public boolean load() {
+		File dataFolder = plugin.getDataFolder();
+		String location = "";
+		
+		if(dataFolder.mkdir()) {
+			plugin.sendConsoleMsg("Config data folder is missing!");
+			plugin.sendConsoleMsg("Creating a new one!");
+		}
+		location = dataFolder.getPath() + "/";
 		if(!writeConfigData()) {
 			plugin.sendConsoleMsg("Unable to create config file!");
 			plugin.sendConsoleMsg("The plugin will be disabled!");
@@ -84,14 +92,6 @@ public class DataManager {
 			plugin.sendConsoleMsg("The plugin will be disabled!");
 			return false;
 		}
-		File dataFolder = plugin.getDataFolder();
-		String location = "";
-		
-		if(dataFolder.mkdir()) {
-			plugin.sendConsoleMsg("Config data folder is missing!");
-			plugin.sendConsoleMsg("Creating a new one!");
-		}
-		location = dataFolder.getPath() + "\\";
 		//Time to read in the data and config info from save files:
 		//Read in config settings
 		try {
@@ -325,13 +325,13 @@ public class DataManager {
 	//Function to see if a player is entering a "save" zone around any Waypoint.
 	//It adds the player and region they are inside of to the list of players
 	//currently inside "save" regions. 
-	public void checkIsSaved(Player p, int x, int z) {
+	public void checkIsSaved(Player p, int x, int y, int z) {
 		Region currentRegion = null;
 		ListIterator<Region> itr = regions.listIterator();
 		
 		while(itr.hasNext()) {
 			currentRegion = itr.next();
-			if(currentRegion.isSaved(x, z)) {
+			if(currentRegion.isSaved(x, y, z)) {
 				playersSaved.put(p.getEntityId(), currentRegion);
 				itr.remove();
 				regions.addFirst(currentRegion);
@@ -352,8 +352,8 @@ public class DataManager {
 	//Function to see if a player is leaving the "save" zone they were in.
 	//It removes the player and region they are inside of to the list of players
 	//currently inside "save" regions. 
-	public void checkIsUnsaved(Player p, Region r, int x, int z) {
-		if(!r.isSaved(x, z)) {
+	public void checkIsUnsaved(Player p, Region r, int x, int y, int z) {
+		if(!r.isSaved(x, y, z)) {
 			this.playersSaved.remove(p.getEntityId());
 		}
 	}
@@ -361,13 +361,13 @@ public class DataManager {
 	//Function to see if a player is entering a "protected" zone around any Waypoint.
 	//It adds the player and region they are inside of to the list of players
 	//currently inside "protected" regions. 
-	public void checkIsProtected(Player p, int x, int z) {
+	public void checkIsProtected(Player p, int x, int y, int z) {
 		Region currentRegion = null;
 		ListIterator<Region> itr = regions.listIterator();
 		
 		while(itr.hasNext()) {
 			currentRegion = itr.next();
-			if(currentRegion.isProtected(x, z)) {
+			if(currentRegion.isProtected(x, y, z)) {
 				playersProtected.put(p.getEntityId(), currentRegion);
 				itr.remove();
 				regions.addFirst(currentRegion);
@@ -388,8 +388,8 @@ public class DataManager {
 	//Function to see if a player is leaving the "protected" zone they were in.
 	//It removes the player and region they are inside of to the list of players
 	//currently inside "protected" regions. 
-	public void checkIsUnprotected(Player p, Region r, int x, int z) {
-		if(!r.isProtected(x, z)) {
+	public void checkIsUnprotected(Player p, Region r, int x, int y, int z) {
+		if(!r.isProtected(x, y, z)) {
 			this.playersProtected.remove(p.getEntityId());
 			
 			if(playersAreProtected())
@@ -443,7 +443,7 @@ public class DataManager {
 		
 		if(((float)totalAir)/75.0 > .66) {
 			p.sendMessage(wpMessage("Surrounding area OK!"));
-			if(!newPointIntersectsAnother(x, z)) {
+			if(!newPointIntersectsAnother(x, y, z)) {
 				p.sendMessage(wpMessage("No points are conflicting!"));
 				p.teleportTo(new Location(current, x + 1.5, y + 1.5, z + .5));
 				
@@ -600,42 +600,74 @@ public class DataManager {
 	//This function checks if a new Waypoint being created at
 	//the giver (x,z) will have regions that intersect with
 	//any other region!
-	private boolean newPointIntersectsAnother(int x, int z) {
+	private boolean newPointIntersectsAnother(int x, int y, int z) {
 		Region currentRegion = null;
 		ListIterator<Region> itr = regions.listIterator();
 		boolean intersectsOther = false;
 		
 		while(itr.hasNext()) {
 			currentRegion = itr.next();
-			if(currentRegion.isSaved(x + saveRadius, z + saveRadius)) {
+			if(currentRegion.isSaved(x + saveRadius, y + saveRadius, z + saveRadius)) {
 				intersectsOther = true;
 				break;
 			}
-			else if(currentRegion.isSaved(x - saveRadius, z + saveRadius)) {
+			if(currentRegion.isSaved(x + saveRadius, y - saveRadius, z + saveRadius)) {
 				intersectsOther = true;
 				break;
 			}
-			else if(currentRegion.isSaved(x + saveRadius, z - saveRadius)) {
+			else if(currentRegion.isSaved(x - saveRadius, y + saveRadius, z + saveRadius)) {
 				intersectsOther = true;
 				break;
 			}
-			else if(currentRegion.isSaved(x - saveRadius, z - saveRadius)) {
+			else if(currentRegion.isSaved(x - saveRadius, y - saveRadius, z + saveRadius)) {
 				intersectsOther = true;
 				break;
 			}
-			else if(currentRegion.isProtected(x + protectionRadius, z + protectionRadius)) {
+			else if(currentRegion.isSaved(x + saveRadius, y + saveRadius, z - saveRadius)) {
 				intersectsOther = true;
 				break;
 			}
-			else if(currentRegion.isProtected(x - protectionRadius, z + protectionRadius)) {
+			else if(currentRegion.isSaved(x + saveRadius, y - saveRadius, z - saveRadius)) {
 				intersectsOther = true;
 				break;
 			}
-			else if(currentRegion.isProtected(x + protectionRadius, z - protectionRadius)) {
+			else if(currentRegion.isSaved(x - saveRadius, y + saveRadius, z - saveRadius)) {
 				intersectsOther = true;
 				break;
 			}
-			else if(currentRegion.isProtected(x - protectionRadius, z - protectionRadius)) {
+			else if(currentRegion.isSaved(x - saveRadius, y - saveRadius, z - saveRadius)) {
+				intersectsOther = true;
+				break;
+			}
+			else if(currentRegion.isProtected(x + protectionRadius, y + protectionRadius, z + protectionRadius)) {
+				intersectsOther = true;
+				break;
+			}
+			else if(currentRegion.isProtected(x + protectionRadius, y - protectionRadius, z + protectionRadius)) {
+				intersectsOther = true;
+				break;
+			}
+			else if(currentRegion.isProtected(x - protectionRadius, y + protectionRadius, z + protectionRadius)) {
+				intersectsOther = true;
+				break;
+			}
+			else if(currentRegion.isProtected(x - protectionRadius, y - protectionRadius, z + protectionRadius)) {
+				intersectsOther = true;
+				break;
+			}
+			else if(currentRegion.isProtected(x + protectionRadius, y + protectionRadius, z - protectionRadius)) {
+				intersectsOther = true;
+				break;
+			}
+			else if(currentRegion.isProtected(x + protectionRadius, y - protectionRadius, z - protectionRadius)) {
+				intersectsOther = true;
+				break;
+			}
+			else if(currentRegion.isProtected(x - protectionRadius, y + protectionRadius, z - protectionRadius)) {
+				intersectsOther = true;
+				break;
+			}
+			else if(currentRegion.isProtected(x - protectionRadius, y - protectionRadius, z - protectionRadius)) {
 				intersectsOther = true;
 				break;
 			}
@@ -984,7 +1016,6 @@ public class DataManager {
 				configMaker.println("# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #");
 				configMaker.println("delete-missing-points=true");
 				configMaker.println("# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #");
-				configMaker.println("#NOT CODED OR WORKING CURRENTLY#");
 				configMaker.println("#As the server loads the plugin will check if there is actually a");
 				configMaker.println("#waypoint in the world. If delete-missing-points is true, when a");
 				configMaker.println("#listed point is not found in the world it will be deleted from");
@@ -1001,7 +1032,6 @@ public class DataManager {
 				configMaker.println("# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #");
 				configMaker.println("data-save-interval=15");
 				configMaker.println("# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #");
-				configMaker.println("#NOT CODED OR WORKING CURRENTLY#");
 				configMaker.println("#Specifies the amount of time in minutes between when the plugin");
 				configMaker.println("#will automatically save all Waypoint data to disk. If set to 0 then");
 				configMaker.println("#the data will not automatically be saved. Data can still be saved");

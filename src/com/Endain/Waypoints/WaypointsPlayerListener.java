@@ -25,15 +25,15 @@ public class WaypointsPlayerListener extends PlayerListener {
     	if(!plugin.getDataManager().hasZeroPoints()) {
 	    	Region r = plugin.getDataManager().playerIsSaved(event.getPlayer());
 	    	if(r != null)
-	    		plugin.getDataManager().checkIsUnsaved(event.getPlayer(), r, event.getTo().getBlockX(), event.getTo().getBlockZ());
+	    		plugin.getDataManager().checkIsUnsaved(event.getPlayer(), r, event.getTo().getBlockX(), event.getTo().getBlockY(), event.getTo().getBlockZ());
 	    	else
-	    		plugin.getDataManager().checkIsSaved(event.getPlayer(), event.getTo().getBlockX(), event.getTo().getBlockZ());	
+	    		plugin.getDataManager().checkIsSaved(event.getPlayer(), event.getTo().getBlockX(), event.getTo().getBlockY(), event.getTo().getBlockZ());	
 	    	
 	    	r = plugin.getDataManager().playerIsProtected(event.getPlayer());
 	    	if(r != null)
-	    		plugin.getDataManager().checkIsUnprotected(event.getPlayer(), r, event.getTo().getBlockX(), event.getTo().getBlockZ());
+	    		plugin.getDataManager().checkIsUnprotected(event.getPlayer(), r, event.getTo().getBlockX(), event.getTo().getBlockY(), event.getTo().getBlockZ());
 	    	else
-	    		plugin.getDataManager().checkIsProtected(event.getPlayer(), event.getTo().getBlockX(), event.getTo().getBlockZ());
+	    		plugin.getDataManager().checkIsProtected(event.getPlayer(), event.getTo().getBlockX(), event.getTo().getBlockY(), event.getTo().getBlockZ());
     	}
     }
     

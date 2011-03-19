@@ -9,14 +9,18 @@ public class Region
 	private int protectRadius;
 	private int protectUpperX;
 	private int protectUpperZ;
+	private int protectUpperY;
 	private int protectLowerX;
 	private int protectLowerZ;
+	private int protectLowerY;
 	@SuppressWarnings("unused")
 	private int saveRadius;
 	private int saveUpperX;
 	private int saveUpperZ;
+	private int saveUpperY;
 	private int saveLowerX;
 	private int saveLowerZ;
+	private int saveLowerY;
 	private Point owner;
 	
 	public Region(int x, int y, int z, int protectRadius, int saveRadius, Point owner)
@@ -27,13 +31,17 @@ public class Region
 		this.protectRadius = protectRadius;
 		this.protectUpperX = x + protectRadius;
 		this.protectUpperZ = z + protectRadius;
+		this.protectUpperY = y + protectRadius;
 		this.protectLowerX = x - protectRadius;
 		this.protectLowerZ = z - protectRadius;
+		this.protectLowerY = y - protectRadius;
 		this.saveRadius = saveRadius;
 		this.saveUpperX = x + saveRadius;
 		this.saveUpperZ = z + saveRadius;
+		this.saveUpperY = y + saveRadius;
 		this.saveLowerX = x - saveRadius;
 		this.saveLowerZ = z - saveRadius;
+		this.saveLowerY = y - saveRadius;
 		this.owner = owner;
 	}
 	
@@ -42,19 +50,21 @@ public class Region
 		return this.owner;
 	}
 	
-	public boolean isSaved(int x, int z)
+	public boolean isSaved(int x, int y, int z)
 	{
 		if(x <= this.saveUpperX && x >= this.saveLowerX)
 			if(z <= this.saveUpperZ && z >= this.saveLowerZ)
-				return true;
+				if(y <= this.saveUpperY && y >= this.saveLowerY)
+					return true;
 		return false;
 	}
 	
-	public boolean isProtected(int x, int z)
+	public boolean isProtected(int x, int y, int z)
 	{
 		if(x <= this.protectUpperX && x >= this.protectLowerX)
 			if(z <= this.protectUpperZ && z >= this.protectLowerZ)
-				return true;
+				if(y <= this.protectUpperY && y >= this.protectLowerY)
+					return true;
 		return false;
 	}
 	
