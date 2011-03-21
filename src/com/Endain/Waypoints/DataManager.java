@@ -605,9 +605,9 @@ public class DataManager {
 		int z = p.getLocation().getBlockZ();
 		int count = 0;
 		
-		for(int j = -this.saveInterval/2; j <= this.saveInterval/2; j++)
-			for(int k = -this.saveInterval/2; k <= this.saveInterval/2; k++)
-				for(int l = -this.saveInterval/2; l <= this.saveInterval/2; l++) {
+		for(int j = -this.saveInterval; j <= this.saveInterval; j++)
+			for(int k = -this.saveInterval; k <= this.saveInterval; k++)
+				for(int l = -this.saveInterval; l <= this.saveInterval; l++) {
 					if(sr == null) {
 						if(y + k > 3)
 							if(current.getBlockAt(x + j, y + k, z + l).getType() == Material.BEDROCK) {
@@ -624,7 +624,7 @@ public class DataManager {
 								}
 					}
 				}
-		p.sendMessage(wpMessage(count + " invalid bedrock block found and removed!"));
+		p.sendMessage(wpMessage(count + " invalid bedrock blocks found and removed!"));
 		return;
 	}
 	
