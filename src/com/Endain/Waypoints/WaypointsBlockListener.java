@@ -34,7 +34,8 @@ public class WaypointsBlockListener extends BlockListener {
     }
     
     public void onBlockIgnite(BlockIgniteEvent event) {
-    	if(plugin.getDataManager().playerIsProtected(event.getPlayer()) != null)
-    		event.setCancelled(true);
+    	if(event.getPlayer() != null)
+    		if(plugin.getDataManager().playerIsProtected(event.getPlayer()) != null)
+    			event.setCancelled(true);
     }
 }

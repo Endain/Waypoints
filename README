@@ -17,6 +17,7 @@ If you are using GroupManager the permission nodes you need to add are:
 waypoints.addpoint    (for /wpadd)
 waypoints.delpoint    (for /wpdel)
 waypoints.savepoint   (for /wpsave)
+waypoints.cleanpoint  (for /wpclean)
 
 Read through the generated config.txt for more details on each config option.
 
@@ -24,6 +25,9 @@ Read through the generated config.txt for more details on each config option.
 
 To bind yourself to a point if the config is not set to bind players automatically a player must type
 the command /wpbind from within the given 'save radius'.
+
+You can use the command /wpclean to search for and remove any bedrock nearby (in the radius defined by
+'save-radius' from config.txt) if it's not a part of a valid Waypoint.
 
 
  - Endain

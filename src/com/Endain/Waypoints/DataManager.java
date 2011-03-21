@@ -34,7 +34,6 @@ public class DataManager {
 	private int protectionRadius;
 	private int saveInterval;
 	private boolean forceAutosave;
-	private boolean autoGenerate;
 	private boolean deleteMissingPoints;
 	private boolean zeroPoints;
 	private boolean protectPlayers;
@@ -119,14 +118,6 @@ public class DataManager {
 					else 
 						throw new Exception();
 				}
-				else if(setting[0].equalsIgnoreCase("auto-generate-points")) {
-					if(setting[1].equalsIgnoreCase("true"))
-						this.autoGenerate = true;
-					else if(setting[1].equalsIgnoreCase("false"))
-						this.autoGenerate = false;
-					else 
-						throw new Exception();
-				}
 				else if(setting[0].equalsIgnoreCase("delete-missing-points")) {
 					if(setting[1].equalsIgnoreCase("true"))
 						this.deleteMissingPoints = true;
@@ -169,7 +160,6 @@ public class DataManager {
 			plugin.sendConsoleMsg("Protection radius: " + this.protectionRadius);
 			plugin.sendConsoleMsg("Save Radius: " + this.saveRadius);
 			plugin.sendConsoleMsg("Force Auto Save: " + this.forceAutosave);
-			plugin.sendConsoleMsg("Auto Generate Points: " + "(UNFINISHED)"/*this.autoGenerate*/);
 			plugin.sendConsoleMsg("Delete Missing Points: " + this.deleteMissingPoints);
 			plugin.sendConsoleMsg("Use GroupManager: " + this.useGroupManager);
 			plugin.sendConsoleMsg("Data Save Interval: " + this.saveInterval);
@@ -441,41 +431,50 @@ public class DataManager {
 					if(current.getBlockAt(x + j, y + k, z + l).getType() == Material.AIR)
 						totalAir++;
 		
-		if(((float)totalAir)/75.0 > .66) {
-			p.sendMessage(wpMessage("Surrounding area OK!"));
-			if(!newPointIntersectsAnother(x, y, z)) {
-				p.sendMessage(wpMessage("No points are conflicting!"));
-				p.teleportTo(new Location(current, x + 1.5, y + 1.5, z + .5));
-				
-				for(int i = -1; i <= 1; i++)
-					for(int j = -1; j <= 1; j++)
-						current.getBlockAt(x + i, y - 1, z + j).setType(Material.GLOWSTONE);
-				
-				for(int i = 0; i < 3; i++)
-					current.getBlockAt(x, y + i, z).setType(Material.BEDROCK);
-				int newId = getLargestPointId() + 1;
-				
-				if(newId >= 0) {
-					Point wp = new Point(newId, current.getName(), x, y, z);
-					wPoints.put(newId, wp);
-					regions.add(new Region(x, y, z, this.protectionRadius, this.saveRadius, wp));
-					p.sendMessage(wpMessage("New Waypoint added successfully!"));
-					p.sendMessage(wpMessage("- - - - - - - - - - - - - - - - -"));
-					p.sendMessage(wpMessage("Id: " + newId));
-					p.sendMessage(wpMessage("Location: (" + x + "," + y + "," + z + ")"));
-					p.sendMessage(wpMessage("Save Radius: " + this.saveRadius));
-					p.sendMessage(wpMessage("Protection Radius: " + this.protectionRadius));
-					this.zeroPoints = false;
-					return;
+		if(y > 4) {
+			if(((float)totalAir)/75.0 > .75) {
+				p.sendMessage(wpMessage("Surrounding area OK!"));
+				if(!newPointIntersectsAnother(x, y, z)) {
+					p.sendMessage(wpMessage("No points are conflicting!"));
+					p.teleportTo(new Location(current, x + 1.5, y + 1.5, z + .5));
+					
+					for(int q = -1; q <= 1; q++)
+						for(int w = -1; w < 3; w++)
+							for(int e = -1; e <= 1; e++)
+								current.getBlockAt(x + q, y + w, z + e).setType(Material.AIR);
+					
+					for(int i = -1; i <= 1; i++)
+						for(int j = -1; j <= 1; j++)
+							current.getBlockAt(x + i, y - 1, z + j).setType(Material.GLOWSTONE);
+					
+					for(int i = 0; i < 3; i++)
+						current.getBlockAt(x, y + i, z).setType(Material.BEDROCK);
+					int newId = getLargestPointId() + 1;
+					
+					if(newId >= 0) {
+						Point wp = new Point(newId, current.getName(), x, y, z);
+						wPoints.put(newId, wp);
+						regions.add(new Region(x, y, z, this.protectionRadius, this.saveRadius, wp));
+						p.sendMessage(wpMessage("New Waypoint added successfully!"));
+						p.sendMessage(wpMessage("- - - - - - - - - - - - - - - - -"));
+						p.sendMessage(wpMessage("Id: " + newId));
+						p.sendMessage(wpMessage("Location: (" + x + "," + y + "," + z + ")"));
+						p.sendMessage(wpMessage("Save Radius: " + this.saveRadius));
+						p.sendMessage(wpMessage("Protection Radius: " + this.protectionRadius));
+						this.zeroPoints = false;
+						return;
+					}
+					else
+						p.sendMessage(wpMessage("Invalid waypoint ID generated!"));
 				}
 				else
-					p.sendMessage(wpMessage("Invalid waypoint ID generated!"));
+					p.sendMessage(wpMessage("New waypoint would intersect another!"));
 			}
 			else
-				p.sendMessage(wpMessage("New waypoint would intersect another!"));
+				p.sendMessage(wpMessage("Not enough space to add waypoint!"));
 		}
 		else
-			p.sendMessage(wpMessage("Not enough space to add waypoint!"));
+			p.sendMessage(wpMessage("Too close to world bottom to add waypoint!"));
 		p.sendMessage(wpMessage("Error adding waypoint!"));
 		return;
 	}
@@ -594,6 +593,38 @@ public class DataManager {
 		cleanPlayerPoints();
 		writePointData(true, notifyServer, true);
 		writePlayerData(true, notifyServer, true);
+		return;
+	}
+	
+	public void tryClean(Player p) {
+		p.sendMessage(wpMessage("Looking for bedrock to clean..."));
+		Region sr = playerIsSaved(p);
+		World current = p.getWorld();
+		int x = p.getLocation().getBlockX();
+		int y = p.getLocation().getBlockY();
+		int z = p.getLocation().getBlockZ();
+		int count = 0;
+		
+		for(int j = -this.saveInterval/2; j <= this.saveInterval/2; j++)
+			for(int k = -this.saveInterval/2; k <= this.saveInterval/2; k++)
+				for(int l = -this.saveInterval/2; l <= this.saveInterval/2; l++) {
+					if(sr == null) {
+						if(y + k > 3)
+							if(current.getBlockAt(x + j, y + k, z + l).getType() == Material.BEDROCK) {
+								current.getBlockAt(x + j, y + k, z + l).setType(Material.AIR);
+								count++;
+							}
+					}
+					else {
+						if(x != sr.getCenterX() && y != sr.getCenterZ())
+							if(y + k > 3)
+								if(current.getBlockAt(x + j, y + k, z + l).getType() == Material.BEDROCK) {
+									current.getBlockAt(x + j, y + k, z + l).setType(Material.AIR);
+									count++;
+								}
+					}
+				}
+		p.sendMessage(wpMessage(count + " invalid bedrock block found and removed!"));
 		return;
 	}
 	
@@ -1005,14 +1036,6 @@ public class DataManager {
 				configMaker.println("#the player must be in this radius to use the /wpbind command.");
 				configMaker.println("#If anything less than 1 is entered the plugin will set the save");
 				configMaker.println("#radius to 1 automatically.");
-				configMaker.println("# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #");
-				configMaker.println("auto-generate-points=false");
-				configMaker.println("# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #");
-				configMaker.println("#NOT CODED OR WORKING CURRENTLY#");
-				configMaker.println("#If true, the plugin will add random waypoints as the map");
-				configMaker.println("#generates. If false, and admin must manually place new waypoints");
-				configMaker.println("#by using the command /wpadd to add a waypoint to where they");
-				configMaker.println("#are currently standing.");
 				configMaker.println("# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #");
 				configMaker.println("delete-missing-points=true");
 				configMaker.println("# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #");
