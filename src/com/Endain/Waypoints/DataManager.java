@@ -3,7 +3,6 @@ package com.Endain.Waypoints;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -68,27 +67,27 @@ public class DataManager {
 	//data and config files and loading any needed data. returns true if it
 	//reaches the end of it's body without critical error(s).
 	public boolean load() {
-		File dataFolder = plugin.getDataFolder();
+		File dataFolder = this.plugin.getDataFolder();
 		String location = "";
 		
 		if(dataFolder.mkdir()) {
-			plugin.sendConsoleMsg("Config data folder is missing!");
-			plugin.sendConsoleMsg("Creating a new one!");
+			this.plugin.sendConsoleMsg("Config data folder is missing!");
+			this.plugin.sendConsoleMsg("Creating a new one!");
 		}
 		location = dataFolder.getPath() + "/";
 		if(!writeConfigData()) {
-			plugin.sendConsoleMsg("Unable to create config file!");
-			plugin.sendConsoleMsg("The plugin will be disabled!");
+			this.plugin.sendConsoleMsg("Unable to create config file!");
+			this.plugin.sendConsoleMsg("The plugin will be disabled!");
 			return false;
 		}
 		if(!writePointData(true, false, false)) {
-			plugin.sendConsoleMsg("Unable to create waypoint data file!");
-			plugin.sendConsoleMsg("The plugin will be disabled!");
+			this.plugin.sendConsoleMsg("Unable to create waypoint data file!");
+			this.plugin.sendConsoleMsg("The plugin will be disabled!");
 			return false;
 		}
 		if(!writePlayerData(true, false, false)) {
-			plugin.sendConsoleMsg("Unable to create player point data file!");
-			plugin.sendConsoleMsg("The plugin will be disabled!");
+			this.plugin.sendConsoleMsg("Unable to create player point data file!");
+			this.plugin.sendConsoleMsg("The plugin will be disabled!");
 			return false;
 		}
 		//Time to read in the data and config info from save files:
@@ -143,8 +142,8 @@ public class DataManager {
 						throw new Exception();
 				}
 				else {
-					plugin.sendConsoleMsg("Unknown setting: " + setting[0]);
-					plugin.sendConsoleMsg("(Ignoring it.)");
+					this.plugin.sendConsoleMsg("Unknown setting: " + setting[0]);
+					this.plugin.sendConsoleMsg("(Ignoring it.)");
 					continue;
 				}
 				
@@ -154,20 +153,20 @@ public class DataManager {
 					this.saveRadius = 1;
 			}
 			scan.close();
-			plugin.sendConsoleMsg("Settings parsed successfully!");
-			plugin.sendConsoleMsg("- - - - - - - - - - - - - - - - - - - - - -");
-			plugin.sendConsoleMsg("Protect Players: " + this.protectPlayers);
-			plugin.sendConsoleMsg("Protection radius: " + this.protectionRadius);
-			plugin.sendConsoleMsg("Save Radius: " + this.saveRadius);
-			plugin.sendConsoleMsg("Force Auto Save: " + this.forceAutosave);
-			plugin.sendConsoleMsg("Delete Missing Points: " + this.deleteMissingPoints);
-			plugin.sendConsoleMsg("Use GroupManager: " + this.useGroupManager);
-			plugin.sendConsoleMsg("Data Save Interval: " + this.saveInterval);
-			plugin.sendConsoleMsg("- - - - - - - - - - - - - - - - - - - - - -");
+			this.plugin.sendConsoleMsg("Settings parsed successfully!");
+			this.plugin.sendConsoleMsg("- - - - - - - - - - - - - - - - - - - - - -");
+			this.plugin.sendConsoleMsg("Protect Players: " + this.protectPlayers);
+			this.plugin.sendConsoleMsg("Protection radius: " + this.protectionRadius);
+			this.plugin.sendConsoleMsg("Save Radius: " + this.saveRadius);
+			this.plugin.sendConsoleMsg("Force Auto Save: " + this.forceAutosave);
+			this.plugin.sendConsoleMsg("Delete Missing Points: " + this.deleteMissingPoints);
+			this.plugin.sendConsoleMsg("Use GroupManager: " + this.useGroupManager);
+			this.plugin.sendConsoleMsg("Data Save Interval: " + this.saveInterval);
+			this.plugin.sendConsoleMsg("- - - - - - - - - - - - - - - - - - - - - -");
 		}
 		catch (Exception e) {
-			plugin.sendConsoleMsg("Unable to parse config file!");
-			plugin.sendConsoleMsg("The plugin will be disabled!");
+			this.plugin.sendConsoleMsg("Unable to parse config file!");
+			this.plugin.sendConsoleMsg("The plugin will be disabled!");
 			return false;
 		}
 		
@@ -182,8 +181,8 @@ public class DataManager {
 			String world;
 			
 			if(this.deleteMissingPoints) {
-				plugin.sendConsoleMsg("Waypoint data will be verified!");
-				plugin.sendConsoleMsg("(This may take a while)");
+				this.plugin.sendConsoleMsg("Waypoint data will be verified!");
+				this.plugin.sendConsoleMsg("(This may take a while)");
 			}
 			
 			while(scan.hasNextLine()) {
@@ -214,35 +213,35 @@ public class DataManager {
 								valid = false;
 						
 						if(valid) {
-							wPoints.put(id, p);
-							regions.add(new Region(x, y, z, this.protectionRadius, this.saveRadius, p));
+							this.wPoints.put(id, p);
+							this.regions.add(new Region(x, y, z, this.protectionRadius, this.saveRadius, p));
 						}
 					}
 					else {
-						wPoints.put(id, p);
-						regions.add(new Region(x, y, z, this.protectionRadius, this.saveRadius, p));
+						this.wPoints.put(id, p);
+						this.regions.add(new Region(x, y, z, this.protectionRadius, this.saveRadius, p));
 					}
 				}
 				else {
-					plugin.sendConsoleMsg("Invalid waypoint in file: " + in);
-					plugin.sendConsoleMsg("(Ignoring it.)");
-					plugin.sendConsoleMsg("I recommend you delete the entry.");
+					this.plugin.sendConsoleMsg("Invalid waypoint in file: " + in);
+					this.plugin.sendConsoleMsg("(Ignoring it.)");
+					this.plugin.sendConsoleMsg("I recommend you delete the entry.");
 				}
 			}
 			
 			scan.close();
 			if(this.deleteMissingPoints)
-				plugin.sendConsoleMsg("Waypoint verification complete!");
-			plugin.sendConsoleMsg("Waypoint data parsed successfully!");
-			plugin.sendConsoleMsg(wPoints.size() + " Waypoints have been loaded!");
-			plugin.sendConsoleMsg("- - - - - - - - - - - - - - - - - - - - - -");
+				this.plugin.sendConsoleMsg("Waypoint verification complete!");
+			this.plugin.sendConsoleMsg("Waypoint data parsed successfully!");
+			this.plugin.sendConsoleMsg(wPoints.size() + " Waypoints have been loaded!");
+			this.plugin.sendConsoleMsg("- - - - - - - - - - - - - - - - - - - - - -");
 			
 			if(wPoints.size() > 0)
-				zeroPoints = false;
+				this.zeroPoints = false;
 		}
 		catch (Exception e) {
-			plugin.sendConsoleMsg("Unable to parse waypoint data file!");
-			plugin.sendConsoleMsg("The plugin will be disabled!");
+			this.plugin.sendConsoleMsg("Unable to parse waypoint data file!");
+			this.plugin.sendConsoleMsg("The plugin will be disabled!");
 			return false;
 		}
 		
@@ -265,27 +264,27 @@ public class DataManager {
 					id = Integer.parseInt(ppoint[1]);
 					Point p = wPoints.get(id);
 					if(p != null)
-						allPlayerPoints.put(player, p);
+						this.allPlayerPoints.put(player, p);
 					else {
-						plugin.sendConsoleMsg("Non-existent point referenced: " + in);
-						plugin.sendConsoleMsg("(Ignoring it.)");
-						plugin.sendConsoleMsg("I recommend you delete the entry.");
+						this.plugin.sendConsoleMsg("Non-existent point referenced: " + in);
+						this.plugin.sendConsoleMsg("(Ignoring it.)");
+						this.plugin.sendConsoleMsg("I recommend you delete the entry.");
 					}
 				}
 				else {
-					plugin.sendConsoleMsg("Invalid player data in file: " + in);
-					plugin.sendConsoleMsg("(Ignoring it.)");
-					plugin.sendConsoleMsg("I recommend you delete the entry.");
+					this.plugin.sendConsoleMsg("Invalid player data in file: " + in);
+					this.plugin.sendConsoleMsg("(Ignoring it.)");
+					this.plugin.sendConsoleMsg("I recommend you delete the entry.");
 				}
 			}
 			scan.close();
-			plugin.sendConsoleMsg("Player point data parsed successfully!");
-			plugin.sendConsoleMsg(allPlayerPoints.size() + " Player points have been loaded!");
-			plugin.sendConsoleMsg("- - - - - - - - - - - - - - - - - - - - - -");
+			this.plugin.sendConsoleMsg("Player point data parsed successfully!");
+			this.plugin.sendConsoleMsg(allPlayerPoints.size() + " Player points have been loaded!");
+			this.plugin.sendConsoleMsg("- - - - - - - - - - - - - - - - - - - - - -");
 		}
 		catch (Exception e) {
-			plugin.sendConsoleMsg("Unable to parse playerpoint data file!");
-			plugin.sendConsoleMsg("The plugin will be disabled!");
+			this.plugin.sendConsoleMsg("Unable to parse playerpoint data file!");
+			this.plugin.sendConsoleMsg("The plugin will be disabled!");
 			return false;
 		}
 		//Force a save to commit any verification changes
@@ -317,14 +316,14 @@ public class DataManager {
 	//currently inside "save" regions. 
 	public void checkIsSaved(Player p, int x, int y, int z) {
 		Region currentRegion = null;
-		ListIterator<Region> itr = regions.listIterator();
+		ListIterator<Region> itr = this.regions.listIterator();
 		
 		while(itr.hasNext()) {
 			currentRegion = itr.next();
 			if(currentRegion.isSaved(x, y, z)) {
-				playersSaved.put(p.getEntityId(), currentRegion);
+				this.playersSaved.put(p.getEntityId(), currentRegion);
 				itr.remove();
-				regions.addFirst(currentRegion);
+				this.regions.addFirst(currentRegion);
 				//If Force Autosave is enabled, bind the player now
 				if(this.forceAutosave)
 					wpBind(p, currentRegion);
@@ -353,14 +352,14 @@ public class DataManager {
 	//currently inside "protected" regions. 
 	public void checkIsProtected(Player p, int x, int y, int z) {
 		Region currentRegion = null;
-		ListIterator<Region> itr = regions.listIterator();
+		ListIterator<Region> itr = this.regions.listIterator();
 		
 		while(itr.hasNext()) {
 			currentRegion = itr.next();
 			if(currentRegion.isProtected(x, y, z)) {
-				playersProtected.put(p.getEntityId(), currentRegion);
+				this.playersProtected.put(p.getEntityId(), currentRegion);
 				itr.remove();
-				regions.addFirst(currentRegion);
+				this.regions.addFirst(currentRegion);
 				
 				if(playersAreProtected())
 					p.sendMessage(wpMessage("You are now protected by a Waypoint!"));
@@ -402,10 +401,10 @@ public class DataManager {
 	//any associated lists/maps that must be updated.
 	public boolean wpBind(Player p, Region r) {
 		if(p != null && r != null) {
-			onlinePlayerPoints.remove(p.getEntityId());
-			onlinePlayerPoints.put(p.getEntityId(), r.getOwner());
-			allPlayerPoints.remove(p.getName());
-			allPlayerPoints.put(p.getName(), r.getOwner());
+			this.onlinePlayerPoints.remove(p.getEntityId());
+			this.onlinePlayerPoints.put(p.getEntityId(), r.getOwner());
+			this.allPlayerPoints.remove(p.getName());
+			this.allPlayerPoints.put(p.getName(), r.getOwner());
 			p.sendMessage(wpMessage("You have been bound to a waypoint!"));
 			return true;
 		}
@@ -453,8 +452,8 @@ public class DataManager {
 					
 					if(newId >= 0) {
 						Point wp = new Point(newId, current.getName(), x, y, z);
-						wPoints.put(newId, wp);
-						regions.add(new Region(x, y, z, this.protectionRadius, this.saveRadius, wp));
+						this.wPoints.put(newId, wp);
+						this.regions.add(new Region(x, y, z, this.protectionRadius, this.saveRadius, wp));
 						p.sendMessage(wpMessage("New Waypoint added successfully!"));
 						p.sendMessage(wpMessage("- - - - - - - - - - - - - - - - -"));
 						p.sendMessage(wpMessage("Id: " + newId));
@@ -544,39 +543,39 @@ public class DataManager {
 			
 			//Players in the removed Waypoint's save region should
 			//no longer be saved!
-			Iterator<Region> itr = playersSaved.values().iterator();
+			Iterator<Region> itr = this.playersSaved.values().iterator();
 			while(itr.hasNext()) {
 				if(itr.next() == sr)
 					itr.remove();
 			}
 			//Players in the removed Waypoints's protection region
 			//should no longer be protected!
-			itr = playersProtected.values().iterator();
+			itr = this.playersProtected.values().iterator();
 			while(itr.hasNext()) {
 				if(itr.next() == sr)
 					itr.remove();
 			}
 			//Online players with the removed Waypoint as their home
 			//can no longer possess it as their spawn!
-			Iterator<Point> itr2 = onlinePlayerPoints.values().iterator();
+			Iterator<Point> itr2 = this.onlinePlayerPoints.values().iterator();
 			while(itr2.hasNext()) {
 				if(itr2.next() == sr.getOwner())
 					itr2.remove();
 			}
 			//Any player that had the removed Waypoint as their home
 			//can no longer possess it as their spawn!
-			itr2 = allPlayerPoints.values().iterator();
+			itr2 = this.allPlayerPoints.values().iterator();
 			while(itr.hasNext()) {
 				if(itr.next() == sr)
 					itr.remove();
 			}
 			//Remove the Point, it no longer exists!
-			wPoints.remove(sr.getOwner().getId());
+			this.wPoints.remove(sr.getOwner().getId());
 			//Remove the region, it no longer exists!
-			regions.remove(sr);
+			this.regions.remove(sr);
 			p.sendMessage(wpMessage("Removed point at (" + x + "," + y + "," + z + ")!"));
 			
-			if(regions.size() == 0)
+			if(this.regions.size() == 0)
 				this.zeroPoints = true;
 			//We're done!
 			return;
@@ -633,72 +632,72 @@ public class DataManager {
 	//any other region!
 	private boolean newPointIntersectsAnother(int x, int y, int z) {
 		Region currentRegion = null;
-		ListIterator<Region> itr = regions.listIterator();
+		ListIterator<Region> itr = this.regions.listIterator();
 		boolean intersectsOther = false;
 		
 		while(itr.hasNext()) {
 			currentRegion = itr.next();
-			if(currentRegion.isSaved(x + saveRadius, y + saveRadius, z + saveRadius)) {
+			if(currentRegion.isSaved(x + this.saveRadius, y + this.saveRadius, z + this.saveRadius)) {
 				intersectsOther = true;
 				break;
 			}
-			if(currentRegion.isSaved(x + saveRadius, y - saveRadius, z + saveRadius)) {
+			if(currentRegion.isSaved(x + this.saveRadius, y - this.saveRadius, z + this.saveRadius)) {
 				intersectsOther = true;
 				break;
 			}
-			else if(currentRegion.isSaved(x - saveRadius, y + saveRadius, z + saveRadius)) {
+			else if(currentRegion.isSaved(x - this.saveRadius, y + this.saveRadius, z + this.saveRadius)) {
 				intersectsOther = true;
 				break;
 			}
-			else if(currentRegion.isSaved(x - saveRadius, y - saveRadius, z + saveRadius)) {
+			else if(currentRegion.isSaved(x - this.saveRadius, y - this.saveRadius, z + this.saveRadius)) {
 				intersectsOther = true;
 				break;
 			}
-			else if(currentRegion.isSaved(x + saveRadius, y + saveRadius, z - saveRadius)) {
+			else if(currentRegion.isSaved(x + this.saveRadius, y + this.saveRadius, z - this.saveRadius)) {
 				intersectsOther = true;
 				break;
 			}
-			else if(currentRegion.isSaved(x + saveRadius, y - saveRadius, z - saveRadius)) {
+			else if(currentRegion.isSaved(x + this.saveRadius, y - this.saveRadius, z - this.saveRadius)) {
 				intersectsOther = true;
 				break;
 			}
-			else if(currentRegion.isSaved(x - saveRadius, y + saveRadius, z - saveRadius)) {
+			else if(currentRegion.isSaved(x - this.saveRadius, y + this.saveRadius, z - this.saveRadius)) {
 				intersectsOther = true;
 				break;
 			}
-			else if(currentRegion.isSaved(x - saveRadius, y - saveRadius, z - saveRadius)) {
+			else if(currentRegion.isSaved(x - this.saveRadius, y - this.saveRadius, z - this.saveRadius)) {
 				intersectsOther = true;
 				break;
 			}
-			else if(currentRegion.isProtected(x + protectionRadius, y + protectionRadius, z + protectionRadius)) {
+			else if(currentRegion.isProtected(x + this.protectionRadius, y + this.protectionRadius, z + this.protectionRadius)) {
 				intersectsOther = true;
 				break;
 			}
-			else if(currentRegion.isProtected(x + protectionRadius, y - protectionRadius, z + protectionRadius)) {
+			else if(currentRegion.isProtected(x + this.protectionRadius, y - this.protectionRadius, z + this.protectionRadius)) {
 				intersectsOther = true;
 				break;
 			}
-			else if(currentRegion.isProtected(x - protectionRadius, y + protectionRadius, z + protectionRadius)) {
+			else if(currentRegion.isProtected(x - this.protectionRadius, y + this.protectionRadius, z + this.protectionRadius)) {
 				intersectsOther = true;
 				break;
 			}
-			else if(currentRegion.isProtected(x - protectionRadius, y - protectionRadius, z + protectionRadius)) {
+			else if(currentRegion.isProtected(x - this.protectionRadius, y - this.protectionRadius, z + this.protectionRadius)) {
 				intersectsOther = true;
 				break;
 			}
-			else if(currentRegion.isProtected(x + protectionRadius, y + protectionRadius, z - protectionRadius)) {
+			else if(currentRegion.isProtected(x + this.protectionRadius, y + this.protectionRadius, z - this.protectionRadius)) {
 				intersectsOther = true;
 				break;
 			}
-			else if(currentRegion.isProtected(x + protectionRadius, y - protectionRadius, z - protectionRadius)) {
+			else if(currentRegion.isProtected(x + this.protectionRadius, y - this.protectionRadius, z - this.protectionRadius)) {
 				intersectsOther = true;
 				break;
 			}
-			else if(currentRegion.isProtected(x - protectionRadius, y + protectionRadius, z - protectionRadius)) {
+			else if(currentRegion.isProtected(x - this.protectionRadius, y + this.protectionRadius, z - this.protectionRadius)) {
 				intersectsOther = true;
 				break;
 			}
-			else if(currentRegion.isProtected(x - protectionRadius, y - protectionRadius, z - protectionRadius)) {
+			else if(currentRegion.isProtected(x - this.protectionRadius, y - this.protectionRadius, z - this.protectionRadius)) {
 				intersectsOther = true;
 				break;
 			}
@@ -709,7 +708,7 @@ public class DataManager {
 	//This function find the Waypoint with the highest ID
 	//from all Waypoints listed and returns its ID.
 	private int getLargestPointId() {
-		Iterator<Integer> itr = wPoints.keySet().iterator();
+		Iterator<Integer> itr = this.wPoints.keySet().iterator();
 		int max = -1;
 		
 		if(itr.hasNext())
@@ -732,44 +731,44 @@ public class DataManager {
 	//belongs to a point that still exists.
 	public void cleanPlayerPoints() {
 		HashMap<String, Point> cleanPlayerPoints = new HashMap<String, Point>();
-		Iterator<Entry<String, Point>> itr = allPlayerPoints.entrySet().iterator();
+		Iterator<Entry<String, Point>> itr = this.allPlayerPoints.entrySet().iterator();
 		Entry<String, Point> current;
 		
 		if(itr.hasNext()) {
 			current = itr.next();
-			if(wPoints.containsKey(current.getValue().getId()))
+			if(this.wPoints.containsKey(current.getValue().getId()))
 				cleanPlayerPoints.put(current.getKey(), current.getValue());
 		}
-		allPlayerPoints = cleanPlayerPoints;
+		this.allPlayerPoints = cleanPlayerPoints;
 	}
 	
 	//This function is called when a player logs into the
 	//server. It loads the players stored Waypoint if they
 	//have one saved.
 	public void onLogin(int id, Player p) {
-		players.put(id, p);
-		Point wp = allPlayerPoints.get(p.getName());
+		this.players.put(id, p);
+		Point wp = this.allPlayerPoints.get(p.getName());
 		if(wp != null)
-			onlinePlayerPoints.put(id, wp);
+			this.onlinePlayerPoints.put(id, wp);
 	}
 	
 	//This function is called when a player logs out of the
 	//server. It unloads the player and their bound Waypoint
 	//from any applicable lists.
 	public void onLogout(int id) {
-		players.remove(id);
-		onlinePlayerPoints.remove(id);
+		this.players.remove(id);
+		this.onlinePlayerPoints.remove(id);
 	}
 	
 	//Returns a player from the player list mapped to the
 	//given entity ID.
 	public Player getPlayerById(int id) {
-		return players.get(id);
+		return this.players.get(id);
 	}
 	
 	//Returns the Waypoint mapped to the given entity ID.
 	public Point getPointByPlayerId(int id) {
-		return onlinePlayerPoints.get(id);
+		return this.onlinePlayerPoints.get(id);
 	}
 	
 	//Checks if there are 0 Waypoints defined.
@@ -791,12 +790,12 @@ public class DataManager {
             if (perm != null) {
             	if(perm.isEnabled()) {
 	                this.permissions = (GroupManager)perm;
-	                plugin.sendConsoleMsg("GroupManager found!");
+	                this.plugin.sendConsoleMsg("GroupManager found!");
 	                setGroupManagerStatus(true);
             	}
             }
             else {
-            	plugin.sendConsoleMsg("GroupManager not found!");
+            	this.plugin.sendConsoleMsg("GroupManager not found!");
                 setGroupManagerStatus(false);
             }
         }
@@ -806,11 +805,11 @@ public class DataManager {
 	public void disableGroupManager() {
 		if (this.permissions != null) {
             this.permissions = null;
-            plugin.sendConsoleMsg("GroupManager found!");
+            this.plugin.sendConsoleMsg("GroupManager found!");
             setGroupManagerStatus(false);
         }
 		else {
-			plugin.sendConsoleMsg("GroupManager not found!");
+			this.plugin.sendConsoleMsg("GroupManager not found!");
             setGroupManagerStatus(false);
 		}
 	}
@@ -818,9 +817,9 @@ public class DataManager {
 	//Sets a flag that denotes if we are hooked into GroupManager
 	public void setGroupManagerStatus(boolean online) {
 		if(online)
-			plugin.sendConsoleMsg("GroupManager functionality ENDABLED!");
+			this.plugin.sendConsoleMsg("GroupManager functionality ENDABLED!");
 		else
-			plugin.sendConsoleMsg("GroupManager functionality DISABLED!");
+			this.plugin.sendConsoleMsg("GroupManager functionality DISABLED!");
 		this.gmIsWorking = online;
 	}
 	
@@ -851,19 +850,19 @@ public class DataManager {
 	//Function to write point data to waypoints.txt.
 	//Also creates the file if it does not exist.
 	private boolean writePointData(boolean notifyConsole, boolean notifyServer, boolean withData) {
-		File dataFolder = plugin.getDataFolder();
+		File dataFolder = this.plugin.getDataFolder();
 		String location = "";
 		
 		if(dataFolder.mkdir()) {
-			plugin.sendConsoleMsg("Config data folder not found!");
-			plugin.sendConsoleMsg("New folder made!");
+			this.plugin.sendConsoleMsg("Config data folder not found!");
+			this.plugin.sendConsoleMsg("New folder made!");
 		}
 		location = dataFolder.getPath() + "/";
 		File points = new File(location + "waypoints.txt");
 		
 		if(!points.exists()) {
-			plugin.sendConsoleMsg("Point data file is missing!");
-			plugin.sendConsoleMsg("Creating a new one!");
+			this.plugin.sendConsoleMsg("Point data file is missing!");
+			this.plugin.sendConsoleMsg("Creating a new one!");
 			PrintWriter pointsMaker;
 			
 			try {
@@ -873,16 +872,16 @@ public class DataManager {
 				pointsMaker.close();
 			}
 			catch(Exception e) {
-				plugin.sendConsoleMsg("Unable to create waypoints file!");
+				this.plugin.sendConsoleMsg("Unable to create waypoints file!");
 				return false;
 			}
 		}
 		else {
 			if(withData) {
 				if(notifyConsole)
-					plugin.sendConsoleMsg("Saving point data!");
+					this.plugin.sendConsoleMsg("Saving point data!");
 				if(notifyServer)
-					plugin.getServer().broadcastMessage(wpMessage("Saving point data!"));
+					this.plugin.getServer().broadcastMessage(wpMessage("Saving point data!"));
 				PrintWriter pointsMaker;
 				
 				try {
@@ -902,15 +901,15 @@ public class DataManager {
 				}
 				catch(Exception e) {
 					if(notifyServer)
-						plugin.getServer().broadcastMessage(wpMessage("Error saving point data file!"));
-					plugin.sendConsoleMsg("Error saving point data file!");
+						this.plugin.getServer().broadcastMessage(wpMessage("Error saving point data file!"));
+					this.plugin.sendConsoleMsg("Error saving point data file!");
 					return false;
 				}
 				
 				if(notifyConsole)
-					plugin.sendConsoleMsg("Point data has been saved!");
+					this.plugin.sendConsoleMsg("Point data has been saved!");
 				if(notifyServer)
-					plugin.getServer().broadcastMessage(wpMessage("Point data has been saved!"));
+					this.plugin.getServer().broadcastMessage(wpMessage("Point data has been saved!"));
 			}
 		}
 		return true;
@@ -919,19 +918,19 @@ public class DataManager {
 	//Function to write player data to waypoints.txt.
 	//Also creates the file if it does not exist.
 	private boolean writePlayerData(boolean notifyConsole, boolean notifyServer, boolean withData) {
-		File dataFolder = plugin.getDataFolder();
+		File dataFolder = this.plugin.getDataFolder();
 		String location = "";
 		
 		if(dataFolder.mkdir()) {
-			plugin.sendConsoleMsg("Config data folder not found!");
-			plugin.sendConsoleMsg("New folder made!");
+			this.plugin.sendConsoleMsg("Config data folder not found!");
+			this.plugin.sendConsoleMsg("New folder made!");
 		}
 		location = dataFolder.getPath() + "/";
 		File players = new File(location + "playerpoints.txt");
 		
 		if(!players.exists()) {
-			plugin.sendConsoleMsg("Player data file is missing!");
-			plugin.sendConsoleMsg("Creating a new one!");
+			this.plugin.sendConsoleMsg("Player data file is missing!");
+			this.plugin.sendConsoleMsg("Creating a new one!");
 			PrintWriter playerMaker;
 			
 			try {
@@ -941,16 +940,16 @@ public class DataManager {
 				playerMaker.close();
 			}
 			catch(Exception e) {
-				plugin.sendConsoleMsg("Unable to create playerpoints file!");
+				this.plugin.sendConsoleMsg("Unable to create playerpoints file!");
 				return false;
 			}
 		}
 		else {
 			if(withData) {
 				if(notifyConsole)
-					plugin.sendConsoleMsg("Saving player data!");
+					this.plugin.sendConsoleMsg("Saving player data!");
 				if(notifyServer)
-					plugin.getServer().broadcastMessage(wpMessage("Saving player data!"));
+					this.plugin.getServer().broadcastMessage(wpMessage("Saving player data!"));
 				PrintWriter playerMaker;
 				
 				try {
@@ -970,15 +969,15 @@ public class DataManager {
 				}
 				catch(Exception e) {
 					if(notifyServer)
-						plugin.getServer().broadcastMessage(wpMessage("Error saving player data file!"));
-					plugin.sendConsoleMsg("Error saving player data file!");
+						this.plugin.getServer().broadcastMessage(wpMessage("Error saving player data file!"));
+					this.plugin.sendConsoleMsg("Error saving player data file!");
 					return false;
 				}
 				
 				if(notifyConsole)
-					plugin.sendConsoleMsg("Player data has been saved!");
+					this.plugin.sendConsoleMsg("Player data has been saved!");
 				if(notifyServer)
-					plugin.getServer().broadcastMessage(wpMessage("Player data has been saved!"));
+					this.plugin.getServer().broadcastMessage(wpMessage("Player data has been saved!"));
 			}
 		}
 		return true;
@@ -987,13 +986,13 @@ public class DataManager {
 	//Function to write default config data to file if
 	//it does not already exist.
 	private boolean writeConfigData() {
-		File dataFolder = plugin.getDataFolder();
+		File dataFolder = this.plugin.getDataFolder();
 		String location = "";
 		
 		if(dataFolder.mkdir())
 		{
-			plugin.sendConsoleMsg("Config data folder not found!");
-			plugin.sendConsoleMsg("New folder made!");
+			this.plugin.sendConsoleMsg("Config data folder not found!");
+			this.plugin.sendConsoleMsg("New folder made!");
 		}
 		location = dataFolder.getPath() + "/";
 		//Check that all needed config files exist
@@ -1001,8 +1000,8 @@ public class DataManager {
 		File config = new File(location + "config.txt");
 		
 		if(!config.exists()) {
-			plugin.sendConsoleMsg("Config file is missing!");
-			plugin.sendConsoleMsg("Creating a new one with default settings!");
+			this.plugin.sendConsoleMsg("Config file is missing!");
+			this.plugin.sendConsoleMsg("Creating a new one with default settings!");
 			PrintWriter configMaker;
 			
 			try {
@@ -1045,7 +1044,7 @@ public class DataManager {
 				configMaker.println("#the list of waypoints. If false, the plugin will create waypoints");
 				configMaker.println("#at the given location.");
 				configMaker.println("# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #");
-				configMaker.println("use-group-manager=true");
+				configMaker.println("use-group-manager=false");
 				configMaker.println("# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #");
 				configMaker.println("#If set to true the plugin will look for the GroupManager plugin");
 				configMaker.println("#and use it while it exists and is enabled, if neither it defaults");
@@ -1063,8 +1062,8 @@ public class DataManager {
 				configMaker.close();
 			}
 			catch(Exception e) {
-				plugin.sendConsoleMsg("Unable to create config file!");
-				plugin.sendConsoleMsg("The plugin will be disabled!");
+				this.plugin.sendConsoleMsg("Unable to create config file!");
+				this.plugin.sendConsoleMsg("The plugin will be disabled!");
 				return false;
 			}
 		}

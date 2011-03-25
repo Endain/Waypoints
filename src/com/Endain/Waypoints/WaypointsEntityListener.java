@@ -11,17 +11,17 @@ public class WaypointsEntityListener extends EntityListener {
     public WaypointsEntityListener(final Waypoints plugin) {
         this.plugin = plugin;
     }
-    
+    //Used to protect players from damage if the plugin is configured to.
     public void onEntityDamage(EntityDamageEvent event) {
-    	if(plugin.getDataManager().playersAreProtected()) {
+    	if(this.plugin.getDataManager().playersAreProtected()) {
 	    	if(event instanceof EntityDamageByEntityEvent) {
 	    		EntityDamageByEntityEvent devent = ((EntityDamageByEntityEvent)event);
 	    		if(devent.getDamager() instanceof Player) {
-	    			if(plugin.getDataManager().playerIsProtected(((Player)devent.getDamager())) != null)
+	    			if(this.plugin.getDataManager().playerIsProtected(((Player)devent.getDamager())) != null)
 	    				event.setCancelled(true);
 	    		}
 	    		else if(devent.getEntity() instanceof Player) {
-	    			if(plugin.getDataManager().playerIsProtected(((Player)devent.getEntity())) != null)
+	    			if(this.plugin.getDataManager().playerIsProtected(((Player)devent.getEntity())) != null)
 	    				event.setCancelled(true);
 	    		}
 	    	}

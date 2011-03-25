@@ -10,37 +10,38 @@ public class WaypointsPlayerListener extends PlayerListener {
     private final Waypoints plugin;
 
     public WaypointsPlayerListener(Waypoints instance) {
-        plugin = instance;
+    	this.plugin = instance;
     }
-
+    //Notify the plugin that a player joined.
     public void onPlayerJoin(PlayerEvent event) {
-    	plugin.getDataManager().onLogin(event.getPlayer().getEntityId(), event.getPlayer());
+    	this.plugin.getDataManager().onLogin(event.getPlayer().getEntityId(), event.getPlayer());
     }
-    
+    //Notify the plugin that a player left teh server.
     public void onPlayerQuit(PlayerEvent event) {
-    	plugin.getDataManager().onLogout(event.getPlayer().getEntityId());
+    	this.plugin.getDataManager().onLogout(event.getPlayer().getEntityId());
     }
-    
+    //Check if we are are entering or exiting a zone every time the player moves.
     public void onPlayerMove(PlayerMoveEvent event) {
-    	if(!plugin.getDataManager().hasZeroPoints()) {
-	    	Region r = plugin.getDataManager().playerIsSaved(event.getPlayer());
+    	if(!this.plugin.getDataManager().hasZeroPoints()) {
+    		//Checks related to 'save zones'
+	    	Region r = this.plugin.getDataManager().playerIsSaved(event.getPlayer());
 	    	if(r != null)
-	    		plugin.getDataManager().checkIsUnsaved(event.getPlayer(), r, event.getTo().getBlockX(), event.getTo().getBlockY(), event.getTo().getBlockZ());
+	    		this.plugin.getDataManager().checkIsUnsaved(event.getPlayer(), r, event.getTo().getBlockX(), event.getTo().getBlockY(), event.getTo().getBlockZ());
 	    	else
-	    		plugin.getDataManager().checkIsSaved(event.getPlayer(), event.getTo().getBlockX(), event.getTo().getBlockY(), event.getTo().getBlockZ());	
-	    	
-	    	r = plugin.getDataManager().playerIsProtected(event.getPlayer());
+	    		this.plugin.getDataManager().checkIsSaved(event.getPlayer(), event.getTo().getBlockX(), event.getTo().getBlockY(), event.getTo().getBlockZ());	
+	    	//Checks related to 'protection zones'
+	    	r = this.plugin.getDataManager().playerIsProtected(event.getPlayer());
 	    	if(r != null)
-	    		plugin.getDataManager().checkIsUnprotected(event.getPlayer(), r, event.getTo().getBlockX(), event.getTo().getBlockY(), event.getTo().getBlockZ());
+	    		this.plugin.getDataManager().checkIsUnprotected(event.getPlayer(), r, event.getTo().getBlockX(), event.getTo().getBlockY(), event.getTo().getBlockZ());
 	    	else
-	    		plugin.getDataManager().checkIsProtected(event.getPlayer(), event.getTo().getBlockX(), event.getTo().getBlockY(), event.getTo().getBlockZ());
+	    		this.plugin.getDataManager().checkIsProtected(event.getPlayer(), event.getTo().getBlockX(), event.getTo().getBlockY(), event.getTo().getBlockZ());
     	}
     }
-    
+    //When the player needs to respawn, send them to their bound Waypoint.
     public void onPlayerRespawn(PlayerRespawnEvent event) {
-    	Point respawn = plugin.getDataManager().getPointByPlayerId(event.getPlayer().getEntityId());
+    	Point respawn = this.plugin.getDataManager().getPointByPlayerId(event.getPlayer().getEntityId());
     	
     	if(respawn != null)
-    		event.setRespawnLocation(new Location(plugin.getServer().getWorld(respawn.getWorld()), respawn.getX() + 1.5, respawn.getY() + 1.5, respawn.getZ() + .5));
+    		event.setRespawnLocation(new Location(this.plugin.getServer().getWorld(respawn.getWorld()), respawn.getX() + 1.5, respawn.getY() + 1.5, respawn.getZ() + .5));
     }
 }

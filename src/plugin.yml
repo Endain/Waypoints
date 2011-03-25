@@ -1,33 +1,27 @@
 name: Waypoints
 main: com.Endain.Waypoints.Waypoints
-version: v0.2.4
-website: Nadda
+version: v0.2.5
 author: Endain
 description: >
-             This plugin will allow players to spawn at 'waypoint' markers that have either been randomly generated within a world or have been placed by an admin.
+             This plugin will allow players to spawn at 'Waypoint' markers that have either been randomly generated within a world or have been placed by an admin.
 commands:
   wpbind:
-    description: Binds you to the nearby waypoint if you are in range.
+    description: Binds you to the nearby Waypoint if you are in range.
     usage: |
-           /<command>
            Example: /<command>
   wpadd:
-    description: Adds a waypoint where you currently stand if it does not intersect with any other waypoints.
+    description: Adds a Waypoint where you currently stand if it does not intersect with any other Waypoints.
     usage: |
-           /<command>
            Example: /<command>
   wpdel:
-    description: Removes any waypoints you are within save/protection range of.
+    description: Removes any Waypoints you are within save/protection range of.
     usage: |
-           /<command>
            Example: /<command>
   wpclean:
-    description: Removes any extra bedrock that isn't a part of a valid waypoint.
+    description: Removes any extra bedrock that isn't a part of a valid Waypoint.
     usage: |
-           /<command>
            Example: /<command>
   wpsave:
-    description: Saves all waypoint data to disk.
+    description: Saves all Waypoint data to disk.
     usage: |
-           /<command>
            Example: /<command>

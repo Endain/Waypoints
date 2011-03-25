@@ -12,30 +12,30 @@ public class WaypointsBlockListener extends BlockListener {
     public WaypointsBlockListener(final Waypoints plugin) {
         this.plugin = plugin;
     }
-    
+    //Used to prevent block breaking in the 'protection zone'.
     public void onBlockBreak(BlockBreakEvent event)
     {
-    	if(plugin.getDataManager().playerIsProtected(event.getPlayer()) != null) {
+    	if(this.plugin.getDataManager().playerIsProtected(event.getPlayer()) != null) {
     		event.setCancelled(true);
     		event.getBlock().setType(event.getBlock().getType());
     	}
     }
-    
+    //Used to prevent block damaging in the 'protection zone'.
     public void onBlockDamage(BlockDamageEvent event) {
-    	if(plugin.getDataManager().playerIsProtected(event.getPlayer()) != null)
+    	if(this.plugin.getDataManager().playerIsProtected(event.getPlayer()) != null)
     		event.setCancelled(true);
     }
-    
+    //Used to prevent block placing in the 'protection zone'.
     public void onBlockPlace(BlockPlaceEvent event) {
-    	if(plugin.getDataManager().playerIsProtected(event.getPlayer()) != null) {
+    	if(this.plugin.getDataManager().playerIsProtected(event.getPlayer()) != null) {
     		event.setBuild(false);
     		event.setCancelled(true);
     	}
     }
-    
+    //Used to prevent block ignition in the 'protection zone'.
     public void onBlockIgnite(BlockIgniteEvent event) {
     	if(event.getPlayer() != null)
-    		if(plugin.getDataManager().playerIsProtected(event.getPlayer()) != null)
+    		if(this.plugin.getDataManager().playerIsProtected(event.getPlayer()) != null)
     			event.setCancelled(true);
     }
 }
