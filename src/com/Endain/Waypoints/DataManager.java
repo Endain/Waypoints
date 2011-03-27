@@ -386,6 +386,20 @@ public class DataManager {
 		}
 	}
 	
+	//Function to see if a given location is inside a protected region.
+	public boolean inProtectedRegion(int x, int y, int z) {
+		Region currentRegion = null;
+		ListIterator<Region> itr = this.regions.listIterator();
+		
+		while(itr.hasNext()) {
+			currentRegion = itr.next();
+			if(currentRegion.isProtected(x, y, z)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	//Checks if a player if within a "save" region. If so it calls wpBind() to
 	//bind the player to the Waypoint that owns the region.
 	public void tryBind(Player p) {
@@ -438,7 +452,7 @@ public class DataManager {
 					p.teleportTo(new Location(current, x + 1.5, y + 1.5, z + .5));
 					
 					for(int q = -1; q <= 1; q++)
-						for(int w = -1; w < 3; w++)
+						for(int w = -1; w < 4; w++)
 							for(int e = -1; e <= 1; e++)
 								current.getBlockAt(x + q, y + w, z + e).setType(Material.AIR);
 					
@@ -458,8 +472,6 @@ public class DataManager {
 						p.sendMessage(wpMessage("- - - - - - - - - - - - - - - - -"));
 						p.sendMessage(wpMessage("Id: " + newId));
 						p.sendMessage(wpMessage("Location: (" + x + "," + y + "," + z + ")"));
-						p.sendMessage(wpMessage("Save Radius: " + this.saveRadius));
-						p.sendMessage(wpMessage("Protection Radius: " + this.protectionRadius));
 						this.zeroPoints = false;
 						return;
 					}
@@ -499,16 +511,27 @@ public class DataManager {
 			ArrayList<Material> localBlocks = new ArrayList<Material>();
 			ArrayList<Integer> blockCount = new ArrayList<Integer>();
 			
-			for(int j = -5; j <= 5; j++)
-				for(int l = -5; l <= 5; l++) {
-					if((j < -1 || j > 1) && (l < -1 || l > 1)) {
+			for(int j = -3; j <= 3; j++)
+				for(int l = -3; l <= 3; l++) {
+					if((j < -1 || j > 1) || (l < -1 || l > 1)) {
 						Material m = current.getBlockAt(x + j, y - 1, z + l).getType();
+						
 						if(localBlocks.contains(m))
 							blockCount.set(localBlocks.indexOf(m), blockCount.get(localBlocks.indexOf(m)) + 1);
 						else {
 							localBlocks.add(m);
 							blockCount.add(1);
-						}	
+						}
+					}
+					else {
+						Material m = current.getBlockAt(x + j, y - 2, z + l).getType();
+						
+						if(localBlocks.contains(m))
+							blockCount.set(localBlocks.indexOf(m), blockCount.get(localBlocks.indexOf(m)) + 1);
+						else {
+							localBlocks.add(m);
+							blockCount.add(1);
+						}
 					}
 				}
 			Material fillMaterial = null;
@@ -634,72 +657,19 @@ public class DataManager {
 		Region currentRegion = null;
 		ListIterator<Region> itr = this.regions.listIterator();
 		boolean intersectsOther = false;
-		
+		int[][] cube = {{1,1,1},{1,1,-1},{1,-1,1},{1,-1,-1},{-1,1,1},{-1,1,-1},{-1,-1,1},{-1,-1,-1}};
 		while(itr.hasNext()) {
 			currentRegion = itr.next();
-			if(currentRegion.isSaved(x + this.saveRadius, y + this.saveRadius, z + this.saveRadius)) {
-				intersectsOther = true;
-				break;
-			}
-			if(currentRegion.isSaved(x + this.saveRadius, y - this.saveRadius, z + this.saveRadius)) {
-				intersectsOther = true;
-				break;
-			}
-			else if(currentRegion.isSaved(x - this.saveRadius, y + this.saveRadius, z + this.saveRadius)) {
-				intersectsOther = true;
-				break;
-			}
-			else if(currentRegion.isSaved(x - this.saveRadius, y - this.saveRadius, z + this.saveRadius)) {
-				intersectsOther = true;
-				break;
-			}
-			else if(currentRegion.isSaved(x + this.saveRadius, y + this.saveRadius, z - this.saveRadius)) {
-				intersectsOther = true;
-				break;
-			}
-			else if(currentRegion.isSaved(x + this.saveRadius, y - this.saveRadius, z - this.saveRadius)) {
-				intersectsOther = true;
-				break;
-			}
-			else if(currentRegion.isSaved(x - this.saveRadius, y + this.saveRadius, z - this.saveRadius)) {
-				intersectsOther = true;
-				break;
-			}
-			else if(currentRegion.isSaved(x - this.saveRadius, y - this.saveRadius, z - this.saveRadius)) {
-				intersectsOther = true;
-				break;
-			}
-			else if(currentRegion.isProtected(x + this.protectionRadius, y + this.protectionRadius, z + this.protectionRadius)) {
-				intersectsOther = true;
-				break;
-			}
-			else if(currentRegion.isProtected(x + this.protectionRadius, y - this.protectionRadius, z + this.protectionRadius)) {
-				intersectsOther = true;
-				break;
-			}
-			else if(currentRegion.isProtected(x - this.protectionRadius, y + this.protectionRadius, z + this.protectionRadius)) {
-				intersectsOther = true;
-				break;
-			}
-			else if(currentRegion.isProtected(x - this.protectionRadius, y - this.protectionRadius, z + this.protectionRadius)) {
-				intersectsOther = true;
-				break;
-			}
-			else if(currentRegion.isProtected(x + this.protectionRadius, y + this.protectionRadius, z - this.protectionRadius)) {
-				intersectsOther = true;
-				break;
-			}
-			else if(currentRegion.isProtected(x + this.protectionRadius, y - this.protectionRadius, z - this.protectionRadius)) {
-				intersectsOther = true;
-				break;
-			}
-			else if(currentRegion.isProtected(x - this.protectionRadius, y + this.protectionRadius, z - this.protectionRadius)) {
-				intersectsOther = true;
-				break;
-			}
-			else if(currentRegion.isProtected(x - this.protectionRadius, y - this.protectionRadius, z - this.protectionRadius)) {
-				intersectsOther = true;
-				break;
+			
+			for(int coord = 0; coord < 8; coord++) {
+				if(currentRegion.isSaved(x + cube[coord][0]*this.saveRadius, y + cube[coord][1]*this.saveRadius, z + cube[coord][2]*this.saveRadius)) {
+					intersectsOther = true;
+					break;
+				}
+				else if(currentRegion.isProtected(x + cube[coord][0]*this.protectionRadius, y + cube[coord][1]*this.protectionRadius, z + cube[coord][2]*this.protectionRadius)) {
+					intersectsOther = true;
+					break;
+				}
 			}
 		}
 		return intersectsOther;
@@ -734,7 +704,7 @@ public class DataManager {
 		Iterator<Entry<String, Point>> itr = this.allPlayerPoints.entrySet().iterator();
 		Entry<String, Point> current;
 		
-		if(itr.hasNext()) {
+		while(itr.hasNext()) {
 			current = itr.next();
 			if(this.wPoints.containsKey(current.getValue().getId()))
 				cleanPlayerPoints.put(current.getKey(), current.getValue());
@@ -956,7 +926,7 @@ public class DataManager {
 					playerMaker = new PrintWriter(players);
 					playerMaker.println("#Waypoints Plugin (Bukkit) Player data file");
 					playerMaker.println("#Player save format: 'playerName:pointId'");
-					Iterator<Entry<String, Point>> itr = allPlayerPoints.entrySet().iterator();
+					Iterator<Entry<String, Point>> itr = this.allPlayerPoints.entrySet().iterator();
 					Entry<String, Point> e = null;
 					
 					while(itr.hasNext()) {

@@ -1,6 +1,6 @@
 name: Waypoints
 main: com.Endain.Waypoints.Waypoints
-version: v0.2.5
+version: v0.2.6
 author: Endain
 description: >
              This plugin will allow players to spawn at 'Waypoint' markers that have either been randomly generated within a world or have been placed by an admin.

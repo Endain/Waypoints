@@ -1,8 +1,10 @@
 package com.Endain.Waypoints;
 
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityListener;
 
 public class WaypointsEntityListener extends EntityListener {
@@ -25,6 +27,14 @@ public class WaypointsEntityListener extends EntityListener {
 	    				event.setCancelled(true);
 	    		}
 	    	}
+    	}
+    }
+    //Used to protect the blocks and players in a protected zone from creeper (or other) explosions.
+    public void onEntityExplode(EntityExplodeEvent event) {
+    	Location loc = event.getLocation();
+    	if(this.plugin.getDataManager().inProtectedRegion(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ())) {
+    		event.blockList().clear();
+    		event.setCancelled(true);
     	}
     }
 }
