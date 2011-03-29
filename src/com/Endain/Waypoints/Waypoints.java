@@ -79,14 +79,16 @@ public class Waypoints extends JavaPlugin {
         if(commandName.equalsIgnoreCase("wpbind")) {
         	if(sender instanceof Player)
         		getDataManager().tryBind((Player)sender);
-        	sender.sendMessage("You arent a human player!");
+        	else
+        		sender.sendMessage("You arent a human player!");
         	return true;
         }
         //Handle the /wpfree command
         else if(commandName.equalsIgnoreCase("wpfree") || commandName.equalsIgnoreCase("wpunbind")) {
         	if(sender instanceof Player)
         		getDataManager().tryUnbind((Player)sender);
-        	sender.sendMessage("You arent a human player!");
+        	else
+        		sender.sendMessage("You arent a human player!");
         	return true;
         }
         //Handle the /wpadd command

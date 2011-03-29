@@ -99,7 +99,8 @@ public class DataManager {
 		try {
 			Scanner scan = new Scanner(new File(location + "config.txt"));
 			String in;
-			boolean warning = false;
+			//8 properties to be loaded in total
+			boolean allLoaded[] = {false,false,false,false,false,false,false,false};
 			
 			while(scan.hasNextLine()) {
 				in = scan.nextLine();
@@ -108,66 +109,62 @@ public class DataManager {
 					continue;
 				String[] setting = in.split("=");
 				
-				if(setting[0].equalsIgnoreCase("protection-radius"))
+				if(setting[0].equalsIgnoreCase("protection-radius")) {
 					this.protectionRadius = Integer.parseInt(setting[1]);
-				else if(setting[0].equalsIgnoreCase("save-radius"))
+					allLoaded[0] = true;
+				}
+				else if(setting[0].equalsIgnoreCase("save-radius")) {
 					this.saveRadius = Integer.parseInt(setting[1]);
-				else if(setting[0].equalsIgnoreCase("data-save-interval"))
+					allLoaded[1] = true;
+				}
+				else if(setting[0].equalsIgnoreCase("data-save-interval")) {
 					this.saveInterval = Integer.parseInt(setting[1]);
+					allLoaded[2] = true;
+				}
 				else if(setting[0].equalsIgnoreCase("allow-unbind")) {
 					if(setting[1].equalsIgnoreCase("true"))
 						this.allowUnbind = true;
 					else if(setting[1].equalsIgnoreCase("false"))
 						this.allowUnbind = false;
-					else {
-						warning = true;
-						printConfigHelp("allow-unbind", true);
-						this.allowUnbind = true;
-					}
+					else 
+						throw new Exception();
+					allLoaded[3] = true;
 				}
 				else if(setting[0].equalsIgnoreCase("force-autosave")) {
 					if(setting[1].equalsIgnoreCase("true"))
 						this.forceAutosave = true;
 					else if(setting[1].equalsIgnoreCase("false"))
 						this.forceAutosave = false;
-					else {
-						warning = true;
-						printConfigHelp("force-autosave", true);
-						this.forceAutosave = true;
-					}
+					else 
+						throw new Exception();
+					allLoaded[4] = true;
 				}
 				else if(setting[0].equalsIgnoreCase("delete-missing-points")) {
 					if(setting[1].equalsIgnoreCase("true"))
 						this.deleteMissingPoints = true;
 					else if(setting[1].equalsIgnoreCase("false"))
 						this.deleteMissingPoints = false;
-					else {
-						warning = true;
-						printConfigHelp("delete-missing-points", true);
-						this.deleteMissingPoints = true;
-					}
+					else 
+						throw new Exception();
+					allLoaded[5] = true;
 				}
 				else if(setting[0].equalsIgnoreCase("use-group-manager")) {
 					if(setting[1].equalsIgnoreCase("true"))
 						this.useGroupManager = true;
 					else if(setting[1].equalsIgnoreCase("false"))
 						this.useGroupManager = false;
-					else {
-						warning = true;
-						printConfigHelp("use-group-manager", false);
-						this.useGroupManager = false;
-					}
+					else 
+						throw new Exception();
+					allLoaded[6] = true;
 				}
 				else if(setting[0].equalsIgnoreCase("protect-players")) {
 					if(setting[1].equalsIgnoreCase("true"))
 						this.protectPlayers = true;
 					else if(setting[1].equalsIgnoreCase("false"))
 						this.protectPlayers = false;
-					else {
-						warning = true;
-						printConfigHelp("protect-players", true);
-						this.protectPlayers = true;
-					}
+					else 
+						throw new Exception();
+					allLoaded[7] = true;
 				}
 				else {
 					this.plugin.sendConsoleMsg("Unknown setting: " + setting[0]);
@@ -181,15 +178,22 @@ public class DataManager {
 					this.saveRadius = 1;
 			}
 			scan.close();
-			if(warning)
-				this.plugin.sendConsoleMsg("Settings parsed with WARNING(S)!");
-			else
-				this.plugin.sendConsoleMsg("Settings parsed successfully!");
+			for(int i = 0; i < allLoaded.length; i++) {
+				if(!allLoaded[i]) {
+					this.plugin.sendConsoleMsg("You are missing properties in config.txt!");
+					this.plugin.sendConsoleMsg("Please either add the missing properties or");
+					this.plugin.sendConsoleMsg("delete config.txt to force a new one to be");
+					this.plugin.sendConsoleMsg("generated and reconfigure it!");
+					throw new Exception();
+				}
+			}
+			this.plugin.sendConsoleMsg("Settings parsed successfully!");
 			this.plugin.sendConsoleMsg("- - - - - - - - - - - - - - - - - - - - - -");
 			this.plugin.sendConsoleMsg("Protect Players: " + this.protectPlayers);
 			this.plugin.sendConsoleMsg("Protection radius: " + this.protectionRadius);
 			this.plugin.sendConsoleMsg("Save Radius: " + this.saveRadius);
 			this.plugin.sendConsoleMsg("Force Auto Save: " + this.forceAutosave);
+			this.plugin.sendConsoleMsg("Allow Unbind: " + this.allowUnbind);
 			this.plugin.sendConsoleMsg("Delete Missing Points: " + this.deleteMissingPoints);
 			this.plugin.sendConsoleMsg("Use GroupManager: " + this.useGroupManager);
 			this.plugin.sendConsoleMsg("Data Save Interval: " + this.saveInterval);
@@ -476,7 +480,7 @@ public class DataManager {
 			this.onlinePlayerPoints.remove(p.getEntityId());
 			this.allPlayerPoints.remove(p.getName());
 			this.playersSaved.remove(p.getEntityId());
-			p.sendMessage(wpMessage("You have broken the connection with your Waypoint!"));
+			p.sendMessage(wpMessage("You are no longer bound to a Waypoint!"));
 			return true;
 		}
 		return false;
@@ -1047,6 +1051,9 @@ public class DataManager {
 			try {
 				configMaker = new PrintWriter(config);
 				configMaker.println("#Waypoints Plugin (Bukkit) Configuration file");
+				configMaker.println("# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #");
+				configMaker.println("#If true, a player will be allowed to unbind themselves from");
+				configMaker.println("#the Waypoint they are currently bound to.");
 				configMaker.println("# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #");
 				configMaker.println("allow-unbind=true");
 				configMaker.println("# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #");
