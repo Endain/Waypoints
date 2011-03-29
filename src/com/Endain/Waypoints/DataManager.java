@@ -32,6 +32,7 @@ public class DataManager {
 	private int saveRadius;
 	private int protectionRadius;
 	private int saveInterval;
+	private boolean allowUnbind;
 	private boolean forceAutosave;
 	private boolean deleteMissingPoints;
 	private boolean zeroPoints;
@@ -55,7 +56,10 @@ public class DataManager {
 		//Initialize variable in case something goes horribly wrong in load(),
 		//we'll at least have valid variables then...
 		this.zeroPoints = true;
+		this.allowUnbind = true;
 		this.protectPlayers = true;
+		this.deleteMissingPoints = true;
+		this.forceAutosave = true;
 		this.gmIsWorking = false;
 		this.useGroupManager = false;
 		this.permissions = null;
@@ -95,6 +99,7 @@ public class DataManager {
 		try {
 			Scanner scan = new Scanner(new File(location + "config.txt"));
 			String in;
+			boolean warning = false;
 			
 			while(scan.hasNextLine()) {
 				in = scan.nextLine();
@@ -109,37 +114,60 @@ public class DataManager {
 					this.saveRadius = Integer.parseInt(setting[1]);
 				else if(setting[0].equalsIgnoreCase("data-save-interval"))
 					this.saveInterval = Integer.parseInt(setting[1]);
+				else if(setting[0].equalsIgnoreCase("allow-unbind")) {
+					if(setting[1].equalsIgnoreCase("true"))
+						this.allowUnbind = true;
+					else if(setting[1].equalsIgnoreCase("false"))
+						this.allowUnbind = false;
+					else {
+						warning = true;
+						printConfigHelp("allow-unbind", true);
+						this.allowUnbind = true;
+					}
+				}
 				else if(setting[0].equalsIgnoreCase("force-autosave")) {
 					if(setting[1].equalsIgnoreCase("true"))
 						this.forceAutosave = true;
 					else if(setting[1].equalsIgnoreCase("false"))
 						this.forceAutosave = false;
-					else 
-						throw new Exception();
+					else {
+						warning = true;
+						printConfigHelp("force-autosave", true);
+						this.forceAutosave = true;
+					}
 				}
 				else if(setting[0].equalsIgnoreCase("delete-missing-points")) {
 					if(setting[1].equalsIgnoreCase("true"))
 						this.deleteMissingPoints = true;
 					else if(setting[1].equalsIgnoreCase("false"))
 						this.deleteMissingPoints = false;
-					else 
-						throw new Exception();
+					else {
+						warning = true;
+						printConfigHelp("delete-missing-points", true);
+						this.deleteMissingPoints = true;
+					}
 				}
 				else if(setting[0].equalsIgnoreCase("use-group-manager")) {
 					if(setting[1].equalsIgnoreCase("true"))
 						this.useGroupManager = true;
 					else if(setting[1].equalsIgnoreCase("false"))
 						this.useGroupManager = false;
-					else 
-						throw new Exception();
+					else {
+						warning = true;
+						printConfigHelp("use-group-manager", false);
+						this.useGroupManager = false;
+					}
 				}
 				else if(setting[0].equalsIgnoreCase("protect-players")) {
 					if(setting[1].equalsIgnoreCase("true"))
 						this.protectPlayers = true;
 					else if(setting[1].equalsIgnoreCase("false"))
 						this.protectPlayers = false;
-					else 
-						throw new Exception();
+					else {
+						warning = true;
+						printConfigHelp("protect-players", true);
+						this.protectPlayers = true;
+					}
 				}
 				else {
 					this.plugin.sendConsoleMsg("Unknown setting: " + setting[0]);
@@ -153,7 +181,10 @@ public class DataManager {
 					this.saveRadius = 1;
 			}
 			scan.close();
-			this.plugin.sendConsoleMsg("Settings parsed successfully!");
+			if(warning)
+				this.plugin.sendConsoleMsg("Settings parsed with WARNING(S)!");
+			else
+				this.plugin.sendConsoleMsg("Settings parsed successfully!");
 			this.plugin.sendConsoleMsg("- - - - - - - - - - - - - - - - - - - - - -");
 			this.plugin.sendConsoleMsg("Protect Players: " + this.protectPlayers);
 			this.plugin.sendConsoleMsg("Protection radius: " + this.protectionRadius);
@@ -423,6 +454,31 @@ public class DataManager {
 			return true;
 		}
 		p.sendMessage(wpMessage("Error binding to waypoint!"));
+		return false;
+	}
+	
+	//Check if players are allowed to unbind and if so then checks if the player
+	//is bound and if so, calls wpUnbind() to unbind them.
+	public void tryUnbind(Player p) {
+		if(this.allowUnbind) {
+			if(this.onlinePlayerPoints.containsKey(p.getEntityId()))
+				wpUnbind(p);
+			else
+				p.sendMessage(wpMessage("You are not bound to a Waypoint!"));
+		}
+		else
+			p.sendMessage(wpMessage("Command disabled!"));
+	}
+	
+	//Unbinds the given player from any Waypoint they are associated with.
+	public boolean wpUnbind(Player p) {
+		if(p != null) {
+			this.onlinePlayerPoints.remove(p.getEntityId());
+			this.allPlayerPoints.remove(p.getName());
+			this.playersSaved.remove(p.getEntityId());
+			p.sendMessage(wpMessage("You have broken the connection with your Waypoint!"));
+			return true;
+		}
 		return false;
 	}
 	
@@ -813,6 +869,20 @@ public class DataManager {
 		return this.protectPlayers;
 	}
 	
+	//Prints out info about a property variable that was missing from the config.
+	private void printConfigHelp(String var, boolean set) {
+		this.plugin.sendConsoleMsg("- - - - - - - - - - - - - - - - - - - - - - - - - - -");
+		this.plugin.sendConsoleMsg("Missing property variable '" + var + "'!");
+		this.plugin.sendConsoleMsg("You have two options:");
+		this.plugin.sendConsoleMsg(" 1. Manually add '" + var + "' to config.txt");
+		this.plugin.sendConsoleMsg("      Example: '" + var + "=true'");
+		this.plugin.sendConsoleMsg(" 2. Delete config.txt and the plugin will generate");
+		this.plugin.sendConsoleMsg("    a new config.txt upon restart. You will need to");
+		this.plugin.sendConsoleMsg("    reconfigure all your settings.");
+		this.plugin.sendConsoleMsg("Setting " + var + " defauling to " + set);
+		this.plugin.sendConsoleMsg("- - - - - - - - - - - - - - - - - - - - - - - - - - -");
+	}
+	
 	//#################################################
 	//PRIVATE IO FUNCTIONS
 	//#################################################
@@ -977,6 +1047,11 @@ public class DataManager {
 			try {
 				configMaker = new PrintWriter(config);
 				configMaker.println("#Waypoints Plugin (Bukkit) Configuration file");
+				configMaker.println("# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #");
+				configMaker.println("allow-unbind=true");
+				configMaker.println("# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #");
+				configMaker.println("#If true, a player will not be able to be damaged if they are");
+				configMaker.println("#within the protection radius of a Waypoint.");
 				configMaker.println("# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #");
 				configMaker.println("protect-players=true");
 				configMaker.println("# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #");

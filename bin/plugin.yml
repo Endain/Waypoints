@@ -1,12 +1,20 @@
 name: Waypoints
 main: com.Endain.Waypoints.Waypoints
-version: v0.2.6
+version: v0.2.7
 author: Endain
 description: >
              This plugin will allow players to spawn at 'Waypoint' markers that have either been randomly generated within a world or have been placed by an admin.
 commands:
   wpbind:
     description: Binds you to the nearby Waypoint if you are in range.
+    usage: |
+           Example: /<command>
+  wpunbind:
+    description: Unbinds your player from a Waypoint if they are bound to one..
+    usage: |
+           Example: /<command>
+  wpfree:
+    description: An alias for the command /wpunbind.
     usage: |
            Example: /<command>
   wpadd:

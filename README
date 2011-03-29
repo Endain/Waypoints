@@ -1,4 +1,4 @@
-README - Waypoints (v0.2.6)
+README - Waypoints (v0.2.7)
 
 To install the plugin, drop it into your plugin folder that resides in your default Bukkit directory.
 - - - - - - - - - - - - - -
@@ -25,6 +25,9 @@ Read through the generated config.txt for more details on each config option.
 
 To bind yourself to a point if the config is not set to bind players automatically a player must type
 the command /wpbind from within the given 'save radius'.
+
+Also you can unbind yourself from a Waypoint by using the command /wpunbind or it's alias /wpfree. This
+feature may be diabled in config.txt if you do not want to allow players to unbind.
 
 You can use the command /wpclean to search for and remove any bedrock nearby (in the radius defined by
 'save-radius' from config.txt) if it's not a part of a valid Waypoint.
