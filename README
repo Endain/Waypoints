@@ -1,4 +1,4 @@
-README - Waypoints (v0.2.7)
+README - Waypoints (v0.3.0)
 
 To install the plugin, drop it into your plugin folder that resides in your default Bukkit directory.
 - - - - - - - - - - - - - -
@@ -14,6 +14,7 @@ changes to apply you must restart the server. Always stop the server using the '
 that all critical data is saved.
 - - - - - - - - - - - - - -
 If you are using GroupManager the permission nodes you need to add are:
+waypoints.wpuse       (for /wpbind, /wpfree, /wpunbind if 'limit-use' and 'use-group-manager' are TRUE)
 waypoints.addpoint    (for /wpadd)
 waypoints.delpoint    (for /wpdel)
 waypoints.savepoint   (for /wpsave)
@@ -23,13 +24,15 @@ Read through the generated config.txt for more details on each config option.
 
 If you're missing a property in config.txt here's a list of all required entries and their default values:
 
-allow-unbind=false
-protect-players=false
-protection-radius=8
+protect-players=true
+allow-unbind=true
+seperate-worlds=true
+limit-use=false
 force-autosave=true
-save-radius=16
 delete-missing-points=true
 use-group-manager=false
+protection-radius=8
+save-radius=12
 data-save-interval=15
 
 - - - - - - - - - - - - - -

@@ -15,15 +15,15 @@ public class WaypointsEntityListener extends EntityListener {
     }
     //Used to protect players from damage if the plugin is configured to.
     public void onEntityDamage(EntityDamageEvent event) {
-    	if(this.plugin.getDataManager().playersAreProtected()) {
+    	if(this.plugin.getConfigManager().getProperty("protect-players").equalsIgnoreCase("true")) {
 	    	if(event instanceof EntityDamageByEntityEvent) {
 	    		EntityDamageByEntityEvent devent = ((EntityDamageByEntityEvent)event);
 	    		if(devent.getDamager() instanceof Player) {
-	    			if(this.plugin.getDataManager().playerIsProtected(((Player)devent.getDamager())) != null)
+	    			if(this.plugin.getWaypointManager().playerIsProtected(((Player)devent.getDamager())) != null)
 	    				event.setCancelled(true);
 	    		}
 	    		else if(devent.getEntity() instanceof Player) {
-	    			if(this.plugin.getDataManager().playerIsProtected(((Player)devent.getEntity())) != null)
+	    			if(this.plugin.getWaypointManager().playerIsProtected(((Player)devent.getEntity())) != null)
 	    				event.setCancelled(true);
 	    		}
 	    	}
@@ -32,7 +32,7 @@ public class WaypointsEntityListener extends EntityListener {
     //Used to protect the blocks and players in a protected zone from creeper (or other) explosions.
     public void onEntityExplode(EntityExplodeEvent event) {
     	Location loc = event.getLocation();
-    	if(this.plugin.getDataManager().inProtectedRegion(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ())) {
+    	if(this.plugin.getWaypointManager().inProtectedRegion(loc.getWorld().getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ())) {
     		event.blockList().clear();
     		event.setCancelled(true);
     	}

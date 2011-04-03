@@ -9,6 +9,11 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.PluginManager;
 
+import com.Endain.Waypoints.Managers.ConfigManager;
+import com.Endain.Waypoints.Managers.DataManager;
+import com.Endain.Waypoints.Managers.PermissionManager;
+import com.Endain.Waypoints.Managers.WaypointManager;
+
 /**
 * This plugin will allow players to spawn at 'Waypoint' markers
 * that have either been randomly generated within a world or have
@@ -20,7 +25,7 @@ import org.bukkit.plugin.PluginManager;
 * 
 * Now on Github.
 * 
-* Public Release version - v0.2.7
+* Public Release version - v0.3.0
 * @author Endain
 */
 public class Waypoints extends JavaPlugin {
@@ -28,14 +33,23 @@ public class Waypoints extends JavaPlugin {
     private final WaypointsBlockListener blockListener = new WaypointsBlockListener(this);
     private final WaypointsEntityListener entityListener = new WaypointsEntityListener(this);
     private final WaypointsServerListener serverListener = new WaypointsServerListener(this);
+    private final WaypointsWorldListener worldListener = new WaypointsWorldListener(this);
     
     //Waypoints Variables
+    private ConfigManager _configManager;
     private DataManager _dataManager;
+    private PermissionManager _permissionManager;
+    private WaypointManager _waypointManager;
+    // OLD private DataManager _dataManager;
     PluginDescriptionFile pdfFile;
 
     public void onDisable() {
-    	if(getDataManager() != null)
-    		getDataManager().trySave(false);
+    	if(this._dataManager != null)
+    		this._dataManager.write();
+    	this._configManager = null;
+    	this._dataManager = null;
+    	this._permissionManager = null;
+    	this._waypointManager = null;
         sendConsoleMsg("DISABLED!");
     }
 
@@ -50,25 +64,41 @@ public class Waypoints extends JavaPlugin {
         pm.registerEvent(Event.Type.PLAYER_MOVE, playerListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLAYER_RESPAWN, playerListener, Priority.Normal, this);
         //Register entity events
-        pm.registerEvent(Event.Type.ENTITY_DAMAGED, entityListener, Priority.Normal, this);
+        pm.registerEvent(Event.Type.ENTITY_DAMAGE, entityListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.ENTITY_EXPLODE, entityListener, Priority.Normal, this);
         //Register block events
         pm.registerEvent(Event.Type.BLOCK_BREAK, blockListener, Priority.Normal, this);
-        pm.registerEvent(Event.Type.BLOCK_PLACED, blockListener, Priority.Normal, this);
+        pm.registerEvent(Event.Type.BLOCK_PLACE, blockListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.BLOCK_IGNITE, blockListener, Priority.Normal, this);
         //Register server events
         pm.registerEvent(Event.Type.PLUGIN_ENABLE, serverListener, Priority.Normal, this);
         pm.registerEvent(Event.Type.PLUGIN_DISABLE, serverListener, Priority.Normal, this);
+        //Register world events
+        pm.registerEvent(Event.Type.WORLD_LOAD, worldListener, Priority.Normal, this);
         
-    	//Init data manager
-    	_dataManager = new DataManager(this);
-    	//Load config and needed data
-    	if(_dataManager.load()) {
-	        //Everything successful, plugin enabled
-	        sendConsoleMsg("ENABLED!");
-    	}
-    	else
+    	//Init managers
+        this._configManager = new ConfigManager(this);
+        if(!this._configManager.load()) {
+        	this.getPluginLoader().disablePlugin(this);
+        	return;
+        }
+    	this._dataManager = new DataManager(this, this._configManager);
+    	if(!this._dataManager.load()) {
     		this.getPluginLoader().disablePlugin(this);
+    		return;
+    	}
+    	this._permissionManager = new PermissionManager(this);
+    	if(!this._permissionManager.load()) {
+    		this.getPluginLoader().disablePlugin(this);
+    		return;
+    	}
+    	this._waypointManager = new WaypointManager(this, this._configManager, this._dataManager, this._permissionManager);
+    	if(!this._waypointManager.load()) {
+    		this.getPluginLoader().disablePlugin(this);
+    		return;
+    	}
+    	
+    	sendConsoleMsg("ENABLED!");
     }
     
     //Handles all plugin commands
@@ -77,16 +107,50 @@ public class Waypoints extends JavaPlugin {
         
         //Handle the /wpbind command
         if(commandName.equalsIgnoreCase("wpbind")) {
-        	if(sender instanceof Player)
-        		getDataManager().tryBind((Player)sender);
+        	if(sender instanceof Player) {
+        		//Check that the called has permission to use this command
+        		if(getConfigManager().getProperty("limit-use").equalsIgnoreCase("true") && getConfigManager().getProperty("use-group-manager").equalsIgnoreCase("true") && getPermissionManager().isWorking()) {
+        			if(getPermissionManager().getPermissions().getWorldsHolder().getWorldPermissions((Player)sender).has((Player)sender, "waypoints.wpuse"))
+        				getWaypointManager().tryBind((Player)sender);
+        			else
+        				sender.sendMessage(getWaypointManager().wpMessage("You do not have permission to do that!"));
+        		}
+        		else if(getConfigManager().getProperty("limit-use").equalsIgnoreCase("true") && getConfigManager().getProperty("limit-use").equalsIgnoreCase("false")) {
+        			if(((Player)sender).isOp())
+        				getWaypointManager().tryBind((Player)sender);
+        			else
+        				sender.sendMessage(getWaypointManager().wpMessage("You do not have permission to do that!"));
+        		}
+        		else
+        			getWaypointManager().tryBind((Player)sender);
+        	}
         	else
         		sender.sendMessage("You arent a human player!");
         	return true;
         }
         //Handle the /wpfree command
         else if(commandName.equalsIgnoreCase("wpfree") || commandName.equalsIgnoreCase("wpunbind")) {
-        	if(sender instanceof Player)
-        		getDataManager().tryUnbind((Player)sender);
+        	if(sender instanceof Player) {
+        		if(getConfigManager().getProperty("allow-unbind").equalsIgnoreCase("true")) {
+	        		//Check that the called has permission to use this command
+	        		if(getConfigManager().getProperty("limit-use").equalsIgnoreCase("true") && getConfigManager().getProperty("use-group-manager").equalsIgnoreCase("true") && getPermissionManager().isWorking()) {
+	        			if(getPermissionManager().getPermissions().getWorldsHolder().getWorldPermissions((Player)sender).has((Player)sender, "waypoints.wpuse"))
+	        				getWaypointManager().tryUnbind((Player)sender);
+	        			else
+	        				sender.sendMessage(getWaypointManager().wpMessage("You do not have permission to do that!"));
+	        		}
+	        		else if(getConfigManager().getProperty("limit-use").equalsIgnoreCase("true") && getConfigManager().getProperty("use-group-manager").equalsIgnoreCase("false")) {
+	        			if(((Player)sender).isOp())
+	        				getWaypointManager().tryUnbind((Player)sender);
+	        			else
+	        				sender.sendMessage(getWaypointManager().wpMessage("You do not have permission to do that!"));
+	        		}
+	        		else
+	        			getWaypointManager().tryUnbind((Player)sender);
+        		}
+        		else
+    				sender.sendMessage(getWaypointManager().wpMessage("Command is disabled!"));
+        	}
         	else
         		sender.sendMessage("You arent a human player!");
         	return true;
@@ -95,14 +159,14 @@ public class Waypoints extends JavaPlugin {
         else if(commandName.equalsIgnoreCase("wpadd")) {
         	if(sender instanceof Player) {
         		//Check that the called has permission to use this command
-        		if(getDataManager().isUsingGroupManager() && getDataManager().gmWorking()) {
-        			if(getDataManager().getPermissions().getWorldsHolder().getWorldPermissions((Player)sender).has((Player)sender, "waypoints.addpoint"))
-        				getDataManager().tryAdd((Player)sender);
+        		if(getConfigManager().getProperty("use-group-manager").equalsIgnoreCase("true") && getPermissionManager().isWorking()) {
+        			if(getPermissionManager().getPermissions().getWorldsHolder().getWorldPermissions((Player)sender).has((Player)sender, "waypoints.addpoint"))
+        				getWaypointManager().tryAdd((Player)sender);
         		}
         		else if(((Player)sender).isOp())
-        			getDataManager().tryAdd((Player)sender);
+        			getWaypointManager().tryAdd((Player)sender);
         		else
-        			sender.sendMessage(getDataManager().wpMessage("You do not have permission to do that!"));
+        			sender.sendMessage(getWaypointManager().wpMessage("You do not have permission to do that!"));
         	}
         	else
         		sender.sendMessage("You arent a human player!");
@@ -112,14 +176,14 @@ public class Waypoints extends JavaPlugin {
         else if(commandName.equalsIgnoreCase("wpdel")) {
         	if(sender instanceof Player) {
         		//Check that the called has permission to use this command
-        		if(getDataManager().isUsingGroupManager() && getDataManager().gmWorking()) {
-        			if(getDataManager().getPermissions().getWorldsHolder().getWorldPermissions((Player)sender).has((Player)sender, "waypoints.delpoint"))
-        				getDataManager().tryDel((Player)sender);
+        		if(getConfigManager().getProperty("use-group-manager").equalsIgnoreCase("true") && getPermissionManager().isWorking()) {
+        			if(getPermissionManager().getPermissions().getWorldsHolder().getWorldPermissions((Player)sender).has((Player)sender, "waypoints.delpoint"))
+        				getWaypointManager().tryDel((Player)sender);
         		}
         		else if(((Player)sender).isOp())
-        			getDataManager().tryDel((Player)sender);
+        			getWaypointManager().tryDel((Player)sender);
         		else
-        			sender.sendMessage(getDataManager().wpMessage("You do not have permission to do that!"));
+        			sender.sendMessage(getWaypointManager().wpMessage("You do not have permission to do that!"));
         	}
         	else
         		sender.sendMessage("You arent a human player!");
@@ -129,14 +193,14 @@ public class Waypoints extends JavaPlugin {
         else if(commandName.equalsIgnoreCase("wpclean")) {
         	if(sender instanceof Player) {
         		//Check that the called has permission to use this command
-        		if(getDataManager().isUsingGroupManager() && getDataManager().gmWorking()) {
-        			if(getDataManager().getPermissions().getWorldsHolder().getWorldPermissions((Player)sender).has((Player)sender, "waypoints.cleanpoint"))
-        				getDataManager().tryClean((Player)sender);
+        		if(getConfigManager().getProperty("use-group-manager").equalsIgnoreCase("true") && getPermissionManager().isWorking()) {
+        			if(getPermissionManager().getPermissions().getWorldsHolder().getWorldPermissions((Player)sender).has((Player)sender, "waypoints.cleanpoint"))
+        				getWaypointManager().tryClean((Player)sender);
         		}
         		else if(((Player)sender).isOp())
-        			getDataManager().tryClean((Player)sender);
+        			getWaypointManager().tryClean((Player)sender);
         		else
-        			sender.sendMessage(getDataManager().wpMessage("You do not have permission to do that!"));
+        			sender.sendMessage(getWaypointManager().wpMessage("You do not have permission to do that!"));
         	}
         	else
         		sender.sendMessage("You arent a human player!");
@@ -146,17 +210,23 @@ public class Waypoints extends JavaPlugin {
         else if(commandName.equalsIgnoreCase("wpsave")) {
         	if(sender instanceof Player) {
         		//Check that the called has permission to use this command
-        		if(getDataManager().isUsingGroupManager() && getDataManager().gmWorking()) {
-        			if(getDataManager().getPermissions().getWorldsHolder().getWorldPermissions((Player)sender).has((Player)sender, "waypoints.savepoint"))
-        				getDataManager().trySave(true);
+        		if(getConfigManager().getProperty("use-group-manager").equalsIgnoreCase("true") && getPermissionManager().isWorking()) {
+        			if(getPermissionManager().getPermissions().getWorldsHolder().getWorldPermissions((Player)sender).has((Player)sender, "waypoints.savepoint")) {
+        				getWaypointManager().save();
+        				sender.sendMessage(getWaypointManager().wpMessage("Data saved!"));
+        			}
         		}
-        		else if(((Player)sender).isOp())
-        			getDataManager().trySave(true);
+        		else if(((Player)sender).isOp()) {
+        			getWaypointManager().save();
+        			sender.sendMessage(getWaypointManager().wpMessage("Data saved!"));
+        		}
         		else
-        			sender.sendMessage(getDataManager().wpMessage("You do not have permission to do that!"));
+        			sender.sendMessage(getWaypointManager().wpMessage("You do not have permission to do that!"));
         	}
-        	else
-        		getDataManager().trySave(true);
+        	else {
+        		getWaypointManager().save();
+        		sender.sendMessage("Data saved!");
+        	}
         	return true;
         }
         
@@ -171,8 +241,23 @@ public class Waypoints extends JavaPlugin {
     		System.out.println("[WAYPOINTS(Unknown Version)] " + msg);
     }
     
-    //DataManager accessor primarily for listeners
+    //ConfigManager accessor
+    public ConfigManager getConfigManager() {
+    	return _configManager;
+    }
+    
+    //DataManager accessor
     public DataManager getDataManager() {
     	return _dataManager;
+    }
+    
+    //PermissionManager accessor
+    public PermissionManager getPermissionManager() {
+    	return _permissionManager;
+    }
+    
+    //WaypointManager accessor
+    public WaypointManager getWaypointManager() {
+    	return _waypointManager;
     }
 }

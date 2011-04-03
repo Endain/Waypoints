@@ -16,14 +16,14 @@ public class WaypointsBlockListener extends BlockListener {
     public void onBlockBreak(BlockBreakEvent event)
     {
     	if(event.getPlayer() != null) {
-	    	if(this.plugin.getDataManager().playerIsProtected(event.getPlayer()) != null) {
+	    	if(this.plugin.getWaypointManager().playerIsProtected(event.getPlayer()) != null) {
 	    		event.setCancelled(true);
 	    		event.getBlock().setType(event.getBlock().getType());
 	    	}
     	}
 	    else {
 	    	Location loc = event.getBlock().getLocation();
-	    	if(this.plugin.getDataManager().inProtectedRegion(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()))
+	    	if(this.plugin.getWaypointManager().inProtectedRegion(loc.getWorld().getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()))
 	    		event.setCancelled(true);
 	    }	
     }
@@ -39,7 +39,7 @@ public class WaypointsBlockListener extends BlockListener {
     //Used to prevent block placing in the 'protection zone'.
     public void onBlockPlace(BlockPlaceEvent event) {
     	if(event.getPlayer() != null) {
-	    	if(this.plugin.getDataManager().playerIsProtected(event.getPlayer()) != null) {
+	    	if(this.plugin.getWaypointManager().playerIsProtected(event.getPlayer()) != null) {
 	    		event.setBuild(false);
 	    		event.setCancelled(true);
 	    	}
@@ -48,12 +48,12 @@ public class WaypointsBlockListener extends BlockListener {
     //Used to prevent block ignition in the 'protection zone'.
     public void onBlockIgnite(BlockIgniteEvent event) {
     	if(event.getPlayer() != null) {
-    		if(this.plugin.getDataManager().playerIsProtected(event.getPlayer()) != null)
+    		if(this.plugin.getWaypointManager().playerIsProtected(event.getPlayer()) != null)
     			event.setCancelled(true);
     	}
 		else {
 	    	Location loc = event.getBlock().getLocation();
-	    	if(this.plugin.getDataManager().inProtectedRegion(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()))
+	    	if(this.plugin.getWaypointManager().inProtectedRegion(loc.getWorld().getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()))
 	    		event.setCancelled(true);
 	    }
     }
